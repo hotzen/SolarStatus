@@ -1,0 +1,31 @@
+================================================================
+Web-Interface for Solaris-Servers to display Status-Information
+================================================================
+
+The Interface is built on minimalistic HTML5 with jQuery.
+If Java-Script is disabled all Status-Information are shown but all eye-candy is hidden.
+
+Tested on Solaris 11 Express, targeted for Open Indiana as well
+
+Installing lighttpd & PHP5
+	sudo pkg install lighttpd
+	sudo pkg install
+
+Bundled /install Directory:
+	 # smf-svc-lighttpd.xml
+	  	service-descriptor for solaris SMF
+	 	see also:
+	 		http://redmine.lighttpd.net/wiki/1/LighttpdOnSolaris
+	 		http://blogs.oracle.com/mandy/entry/lighttpd_smf_troubles
+	 	
+	 # lighttpd.conf
+	 	enables SSL on Port 443 and enabled Fast-CGI for PHP5.
+	 	see also:
+		 	http://redmine.lighttpd.net/wiki/1/Docs:SSL
+	
+Configuring SolarStatus:
+	see conf.php, that's it.
+	
+Feedback appreciated: kai@meder.info
+
+Thanks
