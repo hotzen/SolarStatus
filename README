@@ -7,11 +7,11 @@ If Java-Script is disabled all Status-Information are shown but all eye-candy is
 
 Tested on Solaris 11 Express, targeted for Open Indiana as well
 
-Installing lighttpd & PHP5
+Installing lighttpd & PHP5:
 	sudo pkg install lighttpd
 	sudo pkg install
 
-Bundled /install Directory:
+Bundled 'install' Directory:
 	 # smf-svc-lighttpd.xml
 	  	service-descriptor for solaris SMF
 	 	see also:
