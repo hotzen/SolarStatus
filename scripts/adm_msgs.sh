@@ -1,0 +1,1 @@
+cat /var/adm/messages

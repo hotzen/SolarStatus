@@ -1,0 +1,1 @@
+prstat -a -n 10 -s cpu 1 1

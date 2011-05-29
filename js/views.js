@@ -1,0 +1,3 @@
+var solar_views = {
+	
+}
