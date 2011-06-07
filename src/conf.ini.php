@@ -54,10 +54,10 @@ dev[] = /dev/rdsk/c8t3d0p0
 ; each command-section begins with "command-", followed by the command's id
 
 [commands]
-echo_devset1  = "echo %DEVSET-1"
+; echo_devset1  = "echo %DEVSET-1"
 
 smartctl_info = "%SMARTCTL --info -d sat %DEVSET-1"
-smartctl_all  = "echo %SMARTCTL --all -d sat %DEVSET-1"
+smartctl_all  = "%SMARTCTL --all -d sat %DEVSET-1"
 
 
 ;################################################

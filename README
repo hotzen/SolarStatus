@@ -29,3 +29,7 @@ Screenshot: https://github.com/hotzen/SolarStatus/raw/master/screenshots/filter-
 Download:   https://github.com/hotzen/SolarStatus/raw/master/dist/SolarStatus_0.3.zip
 
 Thanks
+
+Changelog:
+07.06.11	fixed broken command-execution
+			reworked display of raw-output

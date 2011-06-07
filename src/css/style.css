@@ -131,11 +131,11 @@ li, label, a, header, footer, h1, th, time {
 }
 
 .probe .raw .result code:before {
-	content: "[ ";
+	content: "[";
 }
 
 .probe .raw .result code:after {
-	content: " ]";
+	content: "]";
 }
 
 .probe .raw .result pre {
