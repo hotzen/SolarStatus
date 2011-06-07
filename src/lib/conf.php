@@ -22,6 +22,8 @@ function parseIniFile($file) {
 		, 'PROBES'   => array()
 	);
 	
+	$probesAutoOrder = 1000;
+	
 	foreach ($iniUC as $section => $sectionConf) {
 		
 		// devsets
@@ -56,7 +58,16 @@ function parseIniFile($file) {
 				
 			if (isset($sectionConf['SCRIPT']) && isset($sectionConf['CMD']))
 				throw new Exception("Probe '${probeID}' with both SCRIPT and CMD directive");
-						
+			
+			if (!isset($sectionConf['LABEL']))
+				throw new Exception("Probe '${probeID}' without LABEL directive");
+			
+			if (isset($sectionConf['ORDER'])) {
+				$sectionConf['ORDER'] = (int)$sectionConf['ORDER'];
+			} else {
+				$sectionConf['ORDER'] = ++$probesAutoOrder;
+			}
+			
 			$conf['PROBES'][$probeID] = $sectionConf;
 		}
 		
@@ -74,19 +85,8 @@ function parseIniFile($file) {
 		}
 	}
 	
-	// sort filters
+	// sort
 	ksort($conf['FILTERS']);
-	
-	// sort probes
-	$probesAutoOrder = 1000;
-	foreach ($conf['PROBES'] as $probeID => $probeConf) {
-		if (!isset($probeConf['ORDER'])) {
-			$probeConf['ORDER'] = ++$probesAutoOrder;
-		} else {
-			$probeConf['ORDER'] = (int)$probeConf['ORDER'];
-		}
-		$conf[$probeID] = $probeConf;
-	}
 	uasort($conf['PROBES'], 'probeComparator');
 	
 	return $conf;
