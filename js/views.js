@@ -1,3 +1,0 @@
-var solar_views = {
-	
-}

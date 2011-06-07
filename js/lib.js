@@ -5,43 +5,47 @@
 	// );
 // }
 
-function xsd_datetime(ts) {
-	var d = new Date(ts)
+function dateTimeXSD(ts) {
+	var DATE_SEP = "-";
+	var TIME_SEP = ":";
 	
-	var year  = new String( d.getFullYear()  )
-	var month = new String( d.getMonth() + 1 )
-	var days  = new String( d.getDate()      )
-	
-	if (month.length == 1)
-		month = "0" + month
-	
-	if (days.length == 1)
-		days = "0" + days
-	
-	var hours = new String( d.getHours()   )
-	var mins  = new String( d.getMinutes() )
-	var secs  = new String( d.getSeconds() )
-	
-	if (hours.length == 1)
-		hours = "0" + hours
-	
-	if (mins.length == 1)
-		mins = "0" + mins
-		
-	if (secs.length == 1)
-		secs = "0" + secs
-		
-	var date = year  + "-" + month + "-" + days
-	var time = hours + ":" + mins  + ":" + secs
-	
-	return date + "T" + time + "Z" // TODO: proper timezone/utc handling
+	var comps = dateTimeStringComps(ts);
+
+	return comps.year  + DATE_SEP + comps.month + DATE_SEP + comps.days + "T" +
+	       comps.hours + TIME_SEP + comps.mins  + TIME_SEP + comps.secs + "Z" // TODO proper TimeZone
 }
 
-function datetime(ts) {
+function dateTimeHuman(ts) {
+	var DATE_SEP = ".";
+	var TIME_SEP = ":";
+	
+	var comps = dateTimeStringComps(ts);
+
+	return comps.year  + DATE_SEP + comps.month + DATE_SEP + comps.days + " " +
+	       comps.hours + TIME_SEP + comps.mins  + TIME_SEP + comps.secs
+}
+
+function dateTimeComps(ts) {
 	var d = new Date(ts)
+	return {
+		  year:  d.getFullYear()
+		, month: d.getMonth() + 1
+		, days:  d.getDate()
+		, hours: d.getHours()
+		, mins:  d.getMinutes()
+		, secs:  d.getSeconds()
+	}
+}
+
+function dateTimeStringComps(ts) {
+	var comps    = dateTimeComps(ts);
+	var strComps = {}
 	
-	var date = d.getFullYear() + "." + (d.getMonth() + 1) + "." + d.getDate()
-	var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds()
-	
-	return date + " " + time
+	for (var comp in comps) {
+		var v = new String( comps[comp]  );
+		if (v.length == 1)
+			v = "0" + v
+		strComps[comp] = v
+	}
+	return strComps
 }

@@ -1,33 +1,63 @@
 <?php
-require 'conf.php';
-require 'auth.php';
-require 'lib.php';
+require 'lib/conf.php';
+require 'lib/auth.php';
+require 'lib/common.php';
 
 header("Content-Type: text/javascript");
+
+try {
+	loadConfig();
+} catch (Exception $e) {
+	jsonError("NO_CONFIG");
+}
 
 if (!isAuthorized()) {
 	jsonError("NO_AUTH");
 }
 
-if (!isset($_GET["s"])) {
-	jsonError("NO_SCRIPT");
+// SCRIPT
+if (isset($_GET["s"]) ) {
+	$script = $_GET["s"];
+	
+	try {
+		$output = execScript($script);
+		
+		$res = array(
+			"script" => $script,
+			"time"	 => (time() * 1000),
+			"output" => $output
+		);
+		echo json_encode( $res );
+	} catch (Exception $e) {
+		jsonError( $e->getMessage() );
+	}
 }
 
-$script = $_GET["s"];
-
-$result = array();
-$error  = null;
-
-$rc = exec_script($script, $result, $error, $ts);
-
-if ($rc != 0 || isset($error)) {
-	jsonError( $error );
+// COMMAND
+else if (isset($_GET["c"]) ) {
+	$cmdID = $_GET["c"];
+	
+	try {
+		$res = array(
+			"cmd"    => $cmd,
+			"time"	 => (time() * 1000),
+			"output" => array()
+		);
+	
+		$cmdIn = getCommand($cmdID);
+		$cmds  = expandCommands($cmdIn);
+		
+		foreach ($cmds as $cmd) {
+			$res['output'][] = execRaw($cmd);
+		}
+		
+		echo json_encode( $res );
+		
+	} catch (Exception $e) {
+		jsonError( $e->getMessage() );
+	}
 }
 
-$res = array(
-	"script"  => $script,
-	"time"	  => ($ts * 1000),
-	"result"  => $result
-);
-echo json_encode( $res );
-exit; // no session_write_close()
+else {
+	echo jsonError( "NO_INPUT" );
+}

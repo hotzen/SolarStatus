@@ -52,7 +52,7 @@ function TableTransformer() {
 		var dataLC = data.toLowerCase()
 		var maxPatternLength = -1
 		var bestColDef = false
-			
+		
 		for (var k=0; k<this.colDefs.length; ++k) {
 			var colDef = this.colDefs[k]
 			
@@ -65,7 +65,7 @@ function TableTransformer() {
 		return bestColDef
 	}
 	
-	this.transform = function(data, container) {
+	this.transform = function(dataRows, container) {
 		var that = this
 
 		var table = document.createElement("table")
@@ -74,12 +74,12 @@ function TableTransformer() {
 		var tbody = null
 		
 		// split into rows
-		var dataRows = data.split("\n")
+		//var dataRows = data.split("\n")
 		
 		// for each row ...
 		for (var i=0; i<dataRows.length; ++i) {
 			var dataRow = dataRows[i]
-		
+			
 			// console.log(["parsing row", i])
 			if (this.isNoise(dataRow)) {
 				continue

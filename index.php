@@ -1,8 +1,9 @@
 <!DOCTYPE HTML>
 <?php
-require 'conf.php';
+require 'lib/conf.php';
 require 'lib/auth.php';
-require 'lib/lib.php';
+require 'lib/common.php';
+require 'lib/probes.php';
 ?>
 <html>
 <head>
@@ -15,17 +16,21 @@ require 'lib/lib.php';
 	<script src="js/solar.js" type="text/javascript"></script>
 	<script src="js/TableTransformer.js" type="text/javascript"></script>
 	<script src="js/parsers.js" type="text/javascript"></script>
-	<script src="js/views.js" type="text/javascript"></script>
 </head>
 <body>
-
 <?php
+try {
+	loadConfig();
+} catch (Exception $e) {
+	displayException($e);
+	exit;
+}
+
 $password = $challenge = $response = $token = NULL;
 
 if (isPasswordLogin($password)) {
 	if (!loginPWD($password, $token)) {
-		echo getLoginForm(true);
-		echo "</body></html>";
+		echo getLoginForm(true); echo "</body></html>";
 		exit;
 	} else {
 		reloadTokenized($token);
@@ -34,8 +39,7 @@ if (isPasswordLogin($password)) {
 
 if (isChallengeResponseLogin($challenge, $response)) {
 	if (!loginCR($challenge, $response, $token)) {
-		echo getLoginForm(true);
-		echo "</body></html>";
+		echo getLoginForm(true); echo "</body></html>";
 		exit;
 	} else {
 		reloadTokenized($token);
@@ -43,34 +47,55 @@ if (isChallengeResponseLogin($challenge, $response)) {
 }
 
 if (!isAuthorized($token)) {
-	echo getLoginForm(false);
-	echo "</body></html>";
+	echo getLoginForm(false); echo "</body></html>";
 	exit;
 }
+
+?>
+<script type="text/javascript">var TOKEN = "<?php echo $token; ?>";</script>
+<?php
+unset($password, $challenge, $response, $token);
 ?>
 
-<script type="text/javascript">var T = "<?php echo $token; ?>";</script>
 
-<nav id="main-panel" class="hide">
-	<ul id="extract-filters">
-		<li class="selected"><a href="#filter" title="Show all data" data-filter=".group-all">All</a></li>
-		<li><a href="#filter" title="Only show CPU data" data-filter=".group-cpu">CPU</a></li>
-		<li><a href="#filter" title="Only show I/O data" data-filter=".group-io">I/O</a></li>
-		<li><a href="#filter" title="Only show ZFS data" data-filter=".group-zfs">ZFS</a></li>
+<nav id="main-panel">
+	<ul id="probe-filters">
+		<?php
+		$filters = $_SERVER['SOLAR_CONFIG']['FILTERS'];
 		
-		<?php if (isset($_SERVER['CFG']['SMARTMON'])) : ?>
-		<li><a href="#filter" title="Only show S.M.A.R.T. data" data-filter=".group-smartmon">S.M.A.R.T.</a></li>
-		<?php endif; ?>
+		$foundDefault = false;
+		foreach ($filters as $filter) {
+			if (isset($filter['DEFAULT']) && $filter['DEFAULT'])
+				$foundDefault = true;
+		}
 		
-		<li><a href="#filter" title="Only show Processes" data-filter=".group-ps">Processes</a></li>
-		<li><a href="#filter" title="Only show Services" data-filter=".group-svcs">Services</a></li>
-		<li><a href="#filter" title="Only show Logs" data-filter=".group-logs">Logs</a></li>
-		<li><a href="#filter" title="Only show Hardware data" data-filter=".group-hw">Hardware</a></li>
+		$clazzSel = ($foundDefault) ? '' : 'selected';
+		
+		echo <<<EOC
+		<li class="${clazzSel}"><a href="#filter" title="Show no probes" data-filter=".group-none-foo-bar">None</a></li>
+		<li><a href="#filter" title="Show all probes" data-filter=".group-all">All</a></li>
+EOC;
+
+		try {
+			foreach ($filters as $filterID => $filter) {
+				$label = $filter['LABEL'];
+				$selector = $filter['SELECTOR'];
+				$clazzSel = (isset($filter['DEFAULT']) && $filter['DEFAULT']) ? 'selected' : '';
+				
+				echo <<<EOC
+		<li class="${clazzSel}"><a href="#filter" title="Filter ${label}" data-filter="${selector}">${label}</a></li>
+EOC;
+			}
+		} catch (Exception $e) {
+			displayException($e);
+			exit;
+		}
+		?>
 	</ul>
 	
-	<div id="extract-refresh">
-		<label><input id="extract-refresh-active" type="checkbox" name="extract_refresh_active" value="1" /> Auto refresh</label>
-		<label> every <input id="extract-refresh-freq" type="number" name="extract_refresh_freq" min="1" value="3" /> seconds</label>
+	<div id="probe-refresh">
+		<label><input id="probe-refresh-active" type="checkbox" name="probe_refresh_active" value="1" /> Auto refresh</label>
+		<label> every <input id="probe-refresh-freq" type="number" name="probe_refresh_freq" min="1" value="3" /> seconds</label>
 	</div>
 </nav>
 
@@ -85,40 +110,61 @@ if (!isAuthorized($token)) {
 		<li><label>I/O c8t2d0</label><meter min="0" max="100" value="50" title="Read" /><meter min="0" max="100" value="50" title="Write" /></li>
 		<li><label>I/O c8t3d0</label><meter min="0" max="100" value="50" title="Read" /><meter min="0" max="100" value="50" title="Write" /></li>
 		<li><label>Network</label><meter min="0" max="100" value="50" title="Non-Idleness" /></li>
+		<li><label>Top 3 Processes</label><meter min="0" max="100" value="50" title="Non-Idleness" /></li>
 	</ul>
 </section>
 -->
 
-<section id="extracts">
+<section id="probes">
 	<?php
-	echo createScriptExtract("vmstat", "CPU (vmstat)", "group-cpu");
-	echo createScriptExtract("mpstat", "CPU-Cores (mpstat)", "group-cpu");
-	echo createScriptExtract("cpu_current_freq", "CPU Current Frequency", "group-cpu");
-	
-	echo createScriptExtract("iostat", "I/O", "group-io");
-	echo createScriptExtract("nicstat", "Network-Interfaces (<a href=\"http://www.brendangregg.com/K9Toolkit/nicstat.c\">nicstat</a>)", "group-io");
-	
-	echo createScriptExtract("zpool_iostat", "ZFS I/O (zpool iostat)", "group-io group-zfs");
-	echo createScriptExtract("zpool_status", "ZFS Status", "group-zfs");
-	echo createScriptExtract("zpool", "ZFS Pools", "group-zfs");
-	echo createScriptExtract("zfs", "ZFS Filesystems", "group-zfs");
-	
-	
-	echo createScriptExtract("svc_problems", "Service-Problems", "group-svcs");
-	echo createScriptExtract("svcs", "Services", "group-svcs");
-	
-	echo createScriptExtract("prstat", "Top CPU Processes (prstat)", "group-ps");
-	echo createScriptExtract("top", "Top CPU Processes (top)", "group-ps");
-	echo createScriptExtract("ps", "Processes (ps)", "group-ps");
+	$probes  = $_SERVER['SOLAR_CONFIG']['PROBES'];
+	$clazzes = array();
+
+	foreach ($probes as $probeID => $probeConf) {
+		// LABEL
+		if (isset($probeConf['LABEL'])) {
+			$label = $probeConf['LABEL'];
+		} else {
+			$label = $probeID;
+		}
 		
-	echo createScriptExtract("dmesg", "Kernel Ring Buffer (dmesg)", "group-logs");
-	echo createScriptExtract("adm_msgs", "Messages (/var/adm/messages)", "group-logs");
-	
-	echo createScriptExtract("prtdiag", "System Configuration & Diagnostic Information (prtdiag)", "group-hw");
-	echo createScriptExtract("cpu_supported_freq", "CPU Supported Frequencies", "group-cpu group-hw");
-	
-	if (isset($_SERVER['CFG']['SMARTMON'])) {
-		echo createSmartMonToolsExtracts();
+		// CLASS
+		if (isset($probeConf['CLASS'])) {
+			$probeClazzes = splitTrim($probeConf['CLASS'], ' ');
+			$clazzes      = array_unique(array_merge($clazzes, $probeClazzes));
+		} else {
+			$probeClazzes = array();
+		}
+		$probeClazz = implode(' ', $probeClazzes);
+		
+		// SCRIPT / CMD
+		$script = $cmdID = NULL;
+		if (isset($probeConf['SCRIPT'])) {
+			$script = $probeConf['SCRIPT'];
+		} else {
+			$cmdID = $probeConf['CMD'];
+		}
+		
+		// OUTPUT
+		echo <<<EOC
+	<div id="${probeID}" class="probe group-all ${probeClazz}" data-script="${script}" data-cmd="${cmdID}">
+		<header>
+			<h1>${label}</h1>
+			<ul class="view-selector">
+				<li class="view-raw"><a href="#raw" title="View raw data" data-filter="code">Raw</a></li>
+				<li class="view-data hide"><a href="#data" title="View parsed data" data-filter=".data">Parsed</a></li>
+			</ul>
+			<a href="#refresh" class="refresh" title="refresh data"></a>
+			<div class="failure hide"></div>
+		</header>
+		<code></code>
+		<div class="data"></div>
+		<footer>
+			<time datetime="" data-timestamp=""></time>
+		</footer>
+	</div>
+
+EOC;
 	}
 	?>
 </section>

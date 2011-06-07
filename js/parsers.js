@@ -1,7 +1,7 @@
-var solar_parsers = {
-
+$(document).ready(function() {
+	
 	// http://download.oracle.com/docs/cd/E19963-01/html/821-1462/vmstat-1m.html
-	vmstat: function(data, $container) {
+	$("#vmstat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 		
 		tbl.defineNoise("kthr")
@@ -44,11 +44,12 @@ var solar_parsers = {
 		tbl.defineCol("sy",		"system time")
 		tbl.defineCol("id",		"idle time")
 
-		tbl.transform(data, $container.html("").get(0))
-	},
+		tbl.transform(data, targetElem)
+		callbackFn()
+	})
 	
 	// http://download.oracle.com/docs/cd/E19963-01/html/821-1462/mpstat-1m.html
-	mpstat: function(data, $container) {
+	$("#mpstat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineCol("CPU",		"processor ID")
@@ -71,11 +72,12 @@ var solar_parsers = {
 		tbl.defineCol("sze",		"number of processors in the requested processor set")
 		tbl.defineCol("set",		"processor set membership of each CPU")
 
-		tbl.transform(data, $container.html("").get(0))
-	},
+		tbl.transform(data, targetElem)
+		callbackFn()
+	})
 	
 	// http://download.oracle.com/docs/cd/E19963-01/html/821-1462/iostat-1m.html
-	iostat: function(data, $container) {
+	$("#iostat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineNoise("extended device statistics")
@@ -99,10 +101,11 @@ var solar_parsers = {
 		
 		tbl.defineCol("wt",			"the I/O wait time is no longer calculated as a percentage of CPU time, and this statistic will always return zero")
 
-		tbl.transform(data, $container.html("").get(0))
-	},
+		tbl.transform(data, targetElem)
+		callbackFn()
+	})
 
-	nicstat: function(data, $container) {
+	$("#nicstat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 		
 		tbl.defineCol("Time",		"Time")
@@ -116,10 +119,11 @@ var solar_parsers = {
 		tbl.defineCol("%Util",		"%Utilisation (r+w/ifspeed)")
 		tbl.defineCol("Sat",		"Saturation (defer, nocanput, norecvbuf, noxmtbuf)")
 		
-		tbl.transform(data, $container.html("").get(0))
-	},
+		tbl.transform(data, targetElem)
+		callbackFn()
+	})
 
-	zpool_iostat: function(data, $container) {
+	$("#zpool_iostat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 		
 		tbl.defineNoise("capacity")
@@ -137,10 +141,11 @@ var solar_parsers = {
 		
 		//TODO: operations: read/write vs. bandwidth: read/write
 
-		tbl.transform(data, $container.html("").get(0))
-	},
+		tbl.transform(data, targetElem)
+		callbackFn()
+	})
 	
-	zfs: function(data, $container) {
+	$("#zfs").bind('probe', function(evt, id, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineCol("NAME",			"ZFS filesystem")
@@ -150,11 +155,11 @@ var solar_parsers = {
 		tbl.defineCol("SHARESMB",		"shared through SMB")
 		tbl.defineCol("SHARENFS",		"shared through NFS")
 
-		tbl.transform(data, $container.html("").get(0))
-	},
+		tbl.transform(data, targetElem)
+		callbackFn()
+	})
 	
-	
-	ps: function(data, $container) {
+	$("#ps").bind('probe', function(evt, id, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineCol("PID",		"The decimal value of the process ID")
@@ -175,10 +180,11 @@ var solar_parsers = {
 		tbl.defineCol("STIME",		"The starting time or date of the process, printed with no blanks")
 		tbl.defineCol("COMMAND",	"The name of the command being executed")
 
-		tbl.transform(data, $container.html("").get(0))
-	},
+		tbl.transform(data, targetElem)
+		callbackFn()
+	})
 	
-	svcs: function(data, $container) {
+	$("#svcs").bind('probe', function(evt, id, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineCol("STATE",			"The state of the service instance")
@@ -187,10 +193,11 @@ var solar_parsers = {
 										"Otherwise, this column indicates the date on which it did so")
 		tbl.defineCol("FMRI",			"fault management resource identifier")
 		
-		tbl.transform(data, $container.html("").get(0))
-	},
+		tbl.transform(data, targetElem)
+		callbackFn()
+	})
 	
-	prstat: function(data, $container) {
+	$("#prstat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineCol("PID",			"The process ID of the process")
@@ -219,6 +226,7 @@ var solar_parsers = {
 		
 		tbl.defineFooter("Total:")
 		
-		tbl.transform(data, $container.html("").get(0))
-	}
-}
+		tbl.transform(data, targetElem)
+		callbackFn()
+	})
+})

@@ -25,7 +25,7 @@ function isChallengeResponseLogin(&$challenge, &$response) {
 
 function loginPWD($password, &$token) {
 
-	if ($password == $_SERVER['CFG']['AUTH']['PASSWORD']) {
+	if ($password == $_SERVER['SOLAR_CONFIG']['AUTH']['PASSWORD']) {
 		$token = generateToken();
 		return true;
 	}
@@ -48,7 +48,7 @@ function loginCR($challenge, $response, &$token) {
 function isAuthorized(&$token = NULL) {
 			
 	// auth disabled
-	if (!isset($_SERVER['CFG']['AUTH']))
+	if (!isset($_SERVER['SOLAR_CONFIG']['AUTH']))
 		return true;
 	
 	// try passed token
@@ -68,25 +68,26 @@ function isAuthorized(&$token = NULL) {
 }
 
 function generateChallenge() {
-	return sha1( uniqid($_SERVER['CFG']['AUTH']['SECRET'], true) );
+	return sha1( uniqid($_SERVER['SOLAR_CONFIG']['AUTH']['SECRET'], true) );
 }
 
 function generateExpectedResponse($challenge) {
-	return sha1( $challenge . $_SERVER['CFG']['AUTH']['PASSWORD'] );
+	return sha1( $challenge . $_SERVER['SOLAR_CONFIG']['AUTH']['PASSWORD'] );
 }
 
 function generateToken() {
-	$secret = $_SERVER['CFG']['AUTH']['SECRET'];
-	$hours  = round(time() / 7200); // between 1 and 2 hours valid
+	$secret = $_SERVER['SOLAR_CONFIG']['AUTH']['SECRET'];
+	$hours  = round(time() / 7200);
 	$ip     = $_SERVER['REMOTE_ADDR'];
+	$ua     = $_SERVER['HTTP_USER_AGENT'];
 	
-	return sha1( $secret . $hours . $ip );
+	return sha1( $secret . $hours . $ip . $ua );
 }
 
 function checkToken($t) {
 
 	// auth disabled
-	if (!isset($_SERVER['CFG']['AUTH']))
+	if (!isset($_SERVER['SOLAR_CONFIG']['AUTH']))
 		return true;
 
 	return ($t == generateToken());
@@ -109,7 +110,7 @@ function getLoginForm($failed) {
 	<form id="auth" name="auth" action="${self}" method="POST">
 		<input name="c" type="hidden" value="${challenge}" />
 		<input name="r" type="hidden" value="" />
-		<input name="p" type="password" value="" />
+		<input name="p" type="password" value="" autofocus="autofocus" />
 		<input name="auth" type="submit" value="login" />
 	</form>
 EOC;
