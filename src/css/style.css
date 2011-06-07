@@ -143,12 +143,20 @@ li, label, a, header, footer, h1, th, time {
 	font-size: 0.8em;
 }
 
+.probe .raw {
+	min-height: 3em;
+	max-height: 30em;
+	overflow: auto;
+}
+
 .probe .raw .result {
 	border-bottom: 1px dotted black;
 	margin: 5px;
 	margin-top: 1px;
-	max-height: 30em;
-	overflow: auto !important;
+}
+
+.probe .raw .result.last {
+	border-bottom: 0;
 }
 
 .probe .raw .result code {
@@ -176,8 +184,9 @@ li, label, a, header, footer, h1, th, time {
 .probe .data {
 	font-size: 0.8em;
 	margin: 5px;
+	min-height: 3em;
 	max-height: 30em;
-	overflow: auto !important;
+	overflow: auto;
 }
 
 .loading {

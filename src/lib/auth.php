@@ -77,7 +77,7 @@ function generateExpectedResponse($challenge) {
 
 function generateToken() {
 	$secret = $_SERVER['SOLAR_CONFIG']['AUTH']['SECRET'];
-	$hours  = round(time() / 7200);
+	$hours  = round(time() / (3 * 3600));
 	$ip     = $_SERVER['REMOTE_ADDR'];
 	$ua     = $_SERVER['HTTP_USER_AGENT'];
 	

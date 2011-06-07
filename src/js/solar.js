@@ -153,8 +153,11 @@ function refreshProbe($probe) {
 		
 		// reset raw-output and process
 		var $raw = $probe.children(".raw").html("")
-		var resArr = data["result"]
-				
+		var resArr  = data["result"]
+		
+		var firstIdx = 0
+		var lastIdx  = resArr.length - 1
+		
 		for (var i=0; i<resArr.length; ++i) {
 			var res = resArr[i]
 			var resCmd    = res[0]
@@ -167,6 +170,11 @@ function refreshProbe($probe) {
 			
 			// trigger probe-event
 			$probe.trigger('probe', [id, resCmd, resOutArr, containerElem, parserCallback])
+			
+			if (i == firstIdx)
+				$rawRes.addClass("first")
+			if (i == lastIdx)
+				$rawRes.addClass("last")
 		}
 								
 		// apply view
