@@ -27,8 +27,7 @@ if (isset($_GET["s"]) ) {
 		
 		foreach ($scriptCmdLinesRaw as $lineRaw) {
 			$line = trim($lineRaw);
-			
-			if (strlen($line) > 0 && $line.substr(0, 1) != "#") {
+			if (strlen($line) > 0 && substr($line, 0, 1) != "#") {
 				$scriptCmdLines[] = $line;
 			}
 		}
