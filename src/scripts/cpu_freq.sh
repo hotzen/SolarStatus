@@ -1,1 +1,1 @@
-kstat -m cpu_info -i 0 -s current_clock_Hz
+kstat -p -m cpu_info -i 0 -s current_clock_Hz

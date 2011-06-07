@@ -1,1 +1,1 @@
-kstat -m cpu_info -s supported_frequencies_Hz
+kstat -p -m cpu_info -s supported_frequencies_Hz
