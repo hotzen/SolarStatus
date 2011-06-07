@@ -18,10 +18,15 @@ li, label, a, header, footer, h1, th, time {
 	left: 0em;
 	right: 0em;
 	margin: 10px;
-	padding: 10px;
+	padding: 5px;
 	background-color: #8EA7C0;
 	border: 1px solid #72869A;
 	border-radius: 10px;
+	opacity: 0.7;
+}
+
+#main-panel:hover {
+	opacity: 1.0;
 }
 
 #probe-filters {
@@ -39,13 +44,21 @@ li, label, a, header, footer, h1, th, time {
 }
 
 #probe-filters li a {
+	margin-bottom: 1px;
 	color: black;
 	padding: 5px 10px;
 	text-decoration: none;
+	font-size: 0.9em;
+}
+
+#probe-filters li a:hover {
+	margin-bottom: 0;
+	border-bottom: 1px solid black;
 }
 
 #probe-filters li.selected a {
-	border: 1px solid #5B6B7B;
+	margin-bottom: 0;
+	border: 1px solid black;
 	border-radius: 10px;
 }
 
@@ -64,11 +77,11 @@ li, label, a, header, footer, h1, th, time {
 }
 
 #overview {
-	
+	margin-top: 4em;
 }
 
 #probes {
-	margin-top: 5em;
+	margin-top: 4em;
 }
 
 .probe  {
