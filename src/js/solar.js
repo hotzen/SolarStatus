@@ -142,17 +142,28 @@ function refreshProbe($probe) {
 		
 		$probe.find("footer > time").attr("data-timestamp", ts).attr("datetime", dateTime).html( dateTimeLbl )			
 		
-		// store result in <code>
-		var $raw = $probe.children("code")
-		var out = data["output"]
-
-		$raw.html( out.join("\n") )
-		
-		// trigger event
+		// prepare container-element for reactors to the probe-event
 		var $container    = $probe.children(".data").html( "" )
 		var containerElem = $container.get(0)
-		$probe.trigger('probe', [id, out, containerElem, parserCallback])
 		
+		// reset raw-output and process
+		var $raw = $probe.children(".raw").html("")
+		var resArr = data["result"]
+				
+		for (var i=0; i<resArr.length; ++i) {
+			var res = resArr[i]
+			var resCmd    = res[0]
+			var resOutArr = res[1]
+			var resOut    = resOutArr.join("\n")
+			
+			var $rawRes = $( document.createElement("div") ).appendTo( $raw ).addClass("result")
+			$( document.createElement("code") ).appendTo( $rawRes ).html( resCmd )
+			$( document.createElement("pre")  ).appendTo( $rawRes ).html( resOut )
+			
+			// trigger probe-event
+			$probe.trigger('probe', [id, resCmd, resOutArr, containerElem, parserCallback])
+		}
+								
 		// apply view
 		$probe.find(".view-selector li.selected a").click()
 		
@@ -171,10 +182,20 @@ function refreshProbe($probe) {
 	}
 	
 	var script = $probe.attr("data-script")
+	var cmd    = $probe.attr("data-cmd")
 	var time   = (new Date()).getTime()
 	
+	var url = "./exec.php?t=" + TOKEN + "&ts=" + time
+	
+	if (script.length > 0)
+		url += "&s=" + script
+	else if (cmd.length > 0)
+		url += "&c=" + cmd
+	else
+		throw "probe " + id + " does neither define a script nor a command"
+	
 	$.ajax({
-		url:         "./exec.php?s=" + script + "&t=" + TOKEN + "&ts=" + time
+		url:        url
 		, type:	    "GET"
 		, dataType: "json"
 		

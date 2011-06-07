@@ -8,8 +8,8 @@ function execRaw($cmd, &$rc = NULL) {
 	$rc = NULL;
 	exec($cmd, $lines, $rc);
 	
-	if ($rc != 0)
-		throw new Exception("command '${cmd}' failed with code ${rc}");
+	// if ($rc != 0)
+	//     throw new Exception("command '${cmd}' failed with code ${rc}");
 	
 	return $lines;
 }
@@ -35,11 +35,10 @@ function getCommand($cmdID) {
 
 	if (!isset($_SERVER['SOLAR_CONFIG']['COMMANDS']))
 		throw new Exception("no commands configured");
-	
-	
+		
 	if (!isset($_SERVER['SOLAR_CONFIG']['COMMANDS'][$cmdID]))
 		throw new Exception("command '${cmdID}' is not configured");
-
+	
 	return $_SERVER['SOLAR_CONFIG']['COMMANDS'][$cmdID];
 }
 
@@ -77,13 +76,15 @@ function expandDevSets( $cmdIn ) {
 	$cmdsWork = array( $cmdIn );
 	$cmdsDone = array();
 	
+	if (!isset($_SERVER['SOLAR_CONFIG']['DEVSETS']))
+		throw new Exception("no Dev-Sets configured");
+	$devsets = $_SERVER['SOLAR_CONFIG']['DEVSETS'];
+	
 	while (($cmd = array_shift($cmdsWork)) !== NULL) {
 		if (($devSetID = extractDevSetID($cmd)) !== NULL) {
-		
-			if (!isset($_SERVER['SOLAR_CONFIG']['DEVICES'][$devSetID]))
+			if (!isset($devsets[$devSetID]))
 				throw new Exception("invalid devset '${devSetID}' used in cmd '${cmdIn}'");
-			$devSet = $_SERVER['SOLAR_CONFIG']['DEVICES'][$devSetID];
-			
+			$devSet = $devsets[$devSetID];
 			foreach ($devSet as $dev) {
 				$cmdsWork[] = expandDevSetID($cmd, $devSetID, $dev);
 			}

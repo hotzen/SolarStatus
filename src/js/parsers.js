@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	
 	// http://download.oracle.com/docs/cd/E19963-01/html/821-1462/vmstat-1m.html
-	$("#vmstat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
+	$("#vmstat").bind('probe', function(evt, id, cmd, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 		
 		tbl.defineNoise("kthr")
@@ -49,7 +49,7 @@ $(document).ready(function() {
 	})
 	
 	// http://download.oracle.com/docs/cd/E19963-01/html/821-1462/mpstat-1m.html
-	$("#mpstat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
+	$("#mpstat").bind('probe', function(evt, id, cmd, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineCol("CPU",		"processor ID")
@@ -77,7 +77,7 @@ $(document).ready(function() {
 	})
 	
 	// http://download.oracle.com/docs/cd/E19963-01/html/821-1462/iostat-1m.html
-	$("#iostat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
+	$("#iostat").bind('probe', function(evt, id, cmd, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineNoise("extended device statistics")
@@ -105,7 +105,7 @@ $(document).ready(function() {
 		callbackFn()
 	})
 
-	$("#nicstat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
+	$("#nicstat").bind('probe', function(evt, id, cmd, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 		
 		tbl.defineCol("Time",		"Time")
@@ -123,7 +123,7 @@ $(document).ready(function() {
 		callbackFn()
 	})
 
-	$("#zpool_iostat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
+	$("#zpool_iostat").bind('probe', function(evt, id, cmd, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 		
 		tbl.defineNoise("capacity")
@@ -145,7 +145,7 @@ $(document).ready(function() {
 		callbackFn()
 	})
 	
-	$("#zfs").bind('probe', function(evt, id, data, targetElem, callbackFn) {
+	$("#zfs").bind('probe', function(evt, id, cmd, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineCol("NAME",			"ZFS filesystem")
@@ -159,7 +159,7 @@ $(document).ready(function() {
 		callbackFn()
 	})
 	
-	$("#ps").bind('probe', function(evt, id, data, targetElem, callbackFn) {
+	$("#ps").bind('probe', function(evt, id, cmd, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineCol("PID",		"The decimal value of the process ID")
@@ -184,7 +184,7 @@ $(document).ready(function() {
 		callbackFn()
 	})
 	
-	$("#svcs").bind('probe', function(evt, id, data, targetElem, callbackFn) {
+	$("#svcs").bind('probe', function(evt, id, cmd, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineCol("STATE",			"The state of the service instance")
@@ -197,7 +197,7 @@ $(document).ready(function() {
 		callbackFn()
 	})
 	
-	$("#prstat").bind('probe', function(evt, id, data, targetElem, callbackFn) {
+	$("#prstat").bind('probe', function(evt, id, cmd, data, targetElem, callbackFn) {
 		var tbl = new TableTransformer()
 
 		tbl.defineCol("PID",			"The process ID of the process")

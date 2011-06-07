@@ -115,20 +115,40 @@ li, label, a, header, footer, h1, th, time {
 	font-size: 0.8em;
 }
 
-.probe code {
-	display: block;
+.probe .raw .result {
+	border-bottom: 1px dotted black;
+	margin: 5px;
+	margin-top: 1px;
+	max-height: 30em;
+	overflow: auto !important;
+}
+
+.probe .raw .result code {
 	white-space: pre;
 	font-family: "Lucida Console", monospace;
+	font-size: 0.7em;
+	margin-top: -5px;
+}
+
+.probe .raw .result code:before {
+	content: "[ ";
+}
+
+.probe .raw .result code:after {
+	content: " ]";
+}
+
+.probe .raw .result pre {
+	font-family: "Lucida Console", monospace;
 	font-size: 0.8em;
-	margin: 10px;
-	max-height: 40em;
-	overflow: auto !important;
+	margin: 0;
+	padding: 5px;
 }
 
 .probe .data {
 	font-size: 0.8em;
-	margin: 10px;
-	max-height: 40em;
+	margin: 5px;
+	max-height: 30em;
 	overflow: auto !important;
 }
 
@@ -165,7 +185,6 @@ li, label, a, header, footer, h1, th, time {
 
 /* generic style for data-tables */
 .probe .data table {
-	margin: 10px;
 	border-collapse: collapse;
 }
 

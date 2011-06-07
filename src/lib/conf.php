@@ -33,14 +33,7 @@ function parseIniFile($file) {
 			
 			$conf['DEVSETS'][$devSetID] = $sectionConf['DEV'];
 		}
-		
-		// commands
-		else if (preg_match("/COMMAND-([a-z0-9_]+)/i", $section, $matches)) {
-			$cmdID = strtolower($matches[1]);
-
-			$conf['COMMANDS'][$cmdID] = $sectionConf;
-		}
-		
+				
 		// filters
 		else if (preg_match("/FILTER-([0-9]+)/i", $section, $matches)) {
 			$filterID = (int)$matches[1];
@@ -65,6 +58,14 @@ function parseIniFile($file) {
 				throw new Exception("Probe '${probeID}' with both SCRIPT and CMD directive");
 						
 			$conf['PROBES'][$probeID] = $sectionConf;
+		}
+		
+		// commands
+		else if ($section == 'COMMANDS') {
+			foreach ($sectionConf as $cmdID => $cmd) {
+				$cmdID_LC = strtolower($cmdID);
+				$conf['COMMANDS'][$cmdID_LC] = $cmd;
+			}
 		}
 		
 		// anything else

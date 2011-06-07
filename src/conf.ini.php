@@ -1,6 +1,9 @@
 ; <?php exit; ?>
 script_dir = ./scripts
 
+; if a command contains a devset, it is splitted into multiple commands, each with one device of the devset.
+; the output of each command is separated from the other commands by the following directive, when shown in the probe's raw output
+cmd_output_sep = "\n---\n\n"
 
 ;################################################
 ; Support for nicstat <http://www.brendangregg.com/Perf/network.html#nicstat>
@@ -50,14 +53,11 @@ dev[] = /dev/rdsk/c8t3d0p0
 ;
 ; each command-section begins with "command-", followed by the command's id
 
-[command-smartctl_info]
-label   = "Device-Information"
-command = "%SMARTCTL --info -d sat %DEVSET-1"
+[commands]
+echo_devset1  = "echo %DEVSET-1"
 
-[command-smartctl_all]
-label   = "S.M.A.R.T. data"
-command = "%SMARTCTL --all -d sat %DEVSET-1"
-
+smartctl_info = "%SMARTCTL --info -d sat %DEVSET-1"
+smartctl_all  = "echo %SMARTCTL --all -d sat %DEVSET-1"
 
 
 ;################################################

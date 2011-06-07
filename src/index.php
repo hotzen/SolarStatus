@@ -52,7 +52,10 @@ if (!isAuthorized($token)) {
 }
 
 ?>
-<script type="text/javascript">var TOKEN = "<?php echo $token; ?>";</script>
+<script type="text/javascript">
+var TOKEN = "<?php echo $token; ?>";
+var CMD_OUTPUT_SEP = "<?php echo $_SERVER['SOLAR_CONFIG']['CMD_OUTPUT_SEP']; ?>";
+</script>
 <?php
 unset($password, $challenge, $response, $token);
 ?>
@@ -151,13 +154,13 @@ EOC;
 		<header>
 			<h1>${label}</h1>
 			<ul class="view-selector">
-				<li class="view-raw"><a href="#raw" title="View raw data" data-filter="code">Raw</a></li>
+				<li class="view-raw"><a href="#raw" title="View raw data" data-filter=".raw">Raw</a></li>
 				<li class="view-data hide"><a href="#data" title="View parsed data" data-filter=".data">Parsed</a></li>
 			</ul>
 			<a href="#refresh" class="refresh" title="refresh data"></a>
 			<div class="failure hide"></div>
 		</header>
-		<code></code>
+		<div class="raw"></div>
 		<div class="data"></div>
 		<footer>
 			<time datetime="" data-timestamp=""></time>

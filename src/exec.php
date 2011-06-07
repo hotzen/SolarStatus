@@ -21,12 +21,26 @@ if (isset($_GET["s"]) ) {
 	
 	try {
 		$output = execScript($script);
+
+		$scriptCmdLinesRaw = explode("\n", file_get_contents(getScriptPath($script)));
+		$scriptCmdLines    = array();
+		
+		foreach ($scriptCmdLinesRaw as $lineRaw) {
+			$line = trim($lineRaw);
+			
+			if (strlen($line) > 0 && $line.substr(0, 1) != "#") {
+				$scriptCmdLines[] = $line;
+			}
+		}
+		$scriptCmd = implode("\n", $scriptCmdLines);
 		
 		$res = array(
 			"script" => $script,
 			"time"	 => (time() * 1000),
-			"output" => $output
+			"result" => array()
 		);
+		$res['result'][] = array($scriptCmd, $output);
+		
 		echo json_encode( $res );
 	} catch (Exception $e) {
 		jsonError( $e->getMessage() );
@@ -39,16 +53,16 @@ else if (isset($_GET["c"]) ) {
 	
 	try {
 		$res = array(
-			"cmd"    => $cmd,
+			"cmd"    => $cmdID,
 			"time"	 => (time() * 1000),
-			"output" => array()
+			"result" => array()
 		);
 	
 		$cmdIn = getCommand($cmdID);
-		$cmds  = expandCommands($cmdIn);
+		$cmds  = expandCommand($cmdIn);
 		
 		foreach ($cmds as $cmd) {
-			$res['output'][] = execRaw($cmd);
+			$res['result'][] = array($cmd, execRaw($cmd));
 		}
 		
 		echo json_encode( $res );
