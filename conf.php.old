@@ -1,0 +1,48 @@
+<?php
+$_SERVER['SOLAR_CONFIG'] = array(
+	  'SCRIPT_DIR' => './scripts'
+	
+	// comment out to disable auth
+	, 'AUTH' => array(
+		  'PASSWORD' => 'f00bar' // password required to access SolarStatus
+		, 'SECRET'   => '9d9c8a3fb07ccb2c7a56d2f89b2dee6f' // secret seed to create random tokens
+	)
+	
+	// Support for smartmontools <http://smartmontools.sourceforge.net>
+	//   Manuals:
+	//     http://smartmontools.sourceforge.net/man/smartctl.8.html
+	//     http://sourceforge.net/apps/trac/smartmontools/wiki/Powermode
+	//
+	// comment out to disable smartmon
+	, 'SMARTCTL' => '/opt/smartmon/sbin/smartctl'
+	
+	
+	// devices, grouped in dev-sets
+	// each dev-set can be queried by a command by "%DEVSET-<NUM>"
+	//
+	// primarily for smartmon-commands, which require raw-disk-access via /dev/rdsk
+	// and the "whole" disk has to be specified which means you may have to append p0:
+	//			zpool status: cXtYdZ => /dev/rdsk/cXtYdZp0
+	, 'DEVICES' => array(
+		array ( // Set #0, SSD/OS
+			  '/dev/rdsk/c8t0d0s0'
+		)
+		, array( // Set #1, HDD/Storage
+			  '/dev/rdsk/c8t1d0p0'
+			, '/dev/rdsk/c8t2d0p0'
+			, '/dev/rdsk/c8t3d0p0'
+		)
+	)
+	
+	// commands, grouped in command-sets. each command-set can be filtered
+	// each command using a dev-set is executed for each device contained in the dev-set,
+	//   so each device gets a dedicated command-run
+	, 'COMMANDS' => array(
+		  'smartmon_info' => '%SMARTCTL --info -d sat %DEVSET-1'
+		, 'smartmon_all'  => '%SMARTCTL --all -d sat %DEVSET-1'
+	)
+	
+	, 'PROBES' => array(
+		
+	)
+);
