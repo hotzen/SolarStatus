@@ -52,40 +52,25 @@ if (!isAuthorized($token)) {
 }
 
 ?>
-<script type="text/javascript">
-var TOKEN = "<?php echo $token; ?>";
-</script>
-<?php
-unset($password, $challenge, $response, $token);
-?>
+<script type="text/javascript"> var TOKEN = "<?php echo $token; ?>"; </script>
+<?php unset($password, $challenge, $response, $token); ?>
 
 
 <nav id="main-panel">
 	<ul id="probe-filters">
+		<li class="overview"><a href="#overview" title="Show overview" data-filter="#overview">Overview</a></li>
 		<?php
-		$filters = $_SERVER['SOLAR_CONFIG']['FILTERS'];
-		
-		$foundDefault = false;
-		foreach ($filters as $filter) {
-			if (isset($filter['DEFAULT']) && $filter['DEFAULT'])
-				$foundDefault = true;
-		}
-		
-		$clazzSel = ($foundDefault) ? '' : 'selected';
-		
-		echo <<<EOC
-		<li class="${clazzSel}"><a href="#filter" title="Show no probes" data-filter=".group-none-foo-bar">None</a></li>
-		<li><a href="#filter" title="Show all probes" data-filter=".group-all">All</a></li>
-EOC;
-
 		try {
+			$filters = $_SERVER['SOLAR_CONFIG']['FILTERS'];
+			
 			foreach ($filters as $filterID => $filter) {
-				$label = $filter['LABEL'];
+				$label    = $filter['LABEL'];
 				$selector = $filter['SELECTOR'];
 				$clazzSel = (isset($filter['DEFAULT']) && $filter['DEFAULT']) ? 'selected' : '';
-				
+
 				echo <<<EOC
 		<li class="${clazzSel}"><a href="#filter" title="Filter ${label}" data-filter="${selector}">${label}</a></li>
+
 EOC;
 			}
 		} catch (Exception $e) {
@@ -93,6 +78,7 @@ EOC;
 			exit;
 		}
 		?>
+		<li><a href="#filter" title="Show all probes" data-filter=".probe">All</a></li>
 	</ul>
 	
 	<div id="probe-refresh">
@@ -101,21 +87,13 @@ EOC;
 	</div>
 </nav>
 
-<!--
-<section id="overview">
+<section id="overview" class="hide">
 	<ul>
-		<li><label>CPU #1</label><meter min="0" max="100" value="25" title="Non-Idleness" /></li>
-		<li><label>CPU #2</label><meter min="0" max="100" value="50" title="Non-Idleness" /></li>
-		<li><label>I/O c7t0d0</label><meter min="0" max="100" value="50" title="Read" /><meter min="0" max="100" value="50" title="Write" /></li>
-		<li><label>I/O c8t0d0</label><meter min="0" max="100" value="50" title="Read" /><meter min="0" max="100" value="50" title="Write" /></li>
-		<li><label>I/O c8t1d0</label><meter min="0" max="100" value="50" title="Read" /><meter min="0" max="100" value="50" title="Write" /></li>
-		<li><label>I/O c8t2d0</label><meter min="0" max="100" value="50" title="Read" /><meter min="0" max="100" value="50" title="Write" /></li>
-		<li><label>I/O c8t3d0</label><meter min="0" max="100" value="50" title="Read" /><meter min="0" max="100" value="50" title="Write" /></li>
-		<li><label>Network</label><meter min="0" max="100" value="50" title="Non-Idleness" /></li>
-		<li><label>Top 3 Processes</label><meter min="0" max="100" value="50" title="Non-Idleness" /></li>
+		<li>T O D O</li>
+		<li><label>CPU #1 <meter min="0" max="100" value="25" title="Non-Idleness"></meter></label></li>
+		<li><label>CPU #2 <meter min="0" max="100" value="50" title="Non-Idleness"></meter></label></li>
 	</ul>
 </section>
--->
 
 <section id="probes">
 	<?php
@@ -149,7 +127,7 @@ EOC;
 		
 		// OUTPUT
 		echo <<<EOC
-	<div id="${probeID}" class="probe group-all ${probeClazz}" data-script="${script}" data-cmd="${cmdID}">
+	<div id="${probeID}" class="probe ${probeClazz} hide" data-script="${script}" data-cmd="${cmdID}">
 		<header>
 			<h1>${label}</h1>
 			<ul class="view-selector">

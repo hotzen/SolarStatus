@@ -13,15 +13,13 @@ function registerProbeFilters() {
 		// select filter, deselect all others
 		$a.parent("li").addClass("selected").siblings("li").removeClass("selected")
 
-		// hide all probes
-		$(".probe").hide().removeClass("hide")
+		// hide all probes & overview
+		$(".probe").add("#overview").hide().removeClass("hide")
 		
 		// split the filter, then add() its parts
 		var filters = $a.attr("data-filter").split(";")
 		var $probes = $( filters[0] )
-		
-		console.log( $probes );
-		
+			
 		for (var i=1; i<filters.length; ++i) {
 			$probes = $probes.add(filters[i])
 		}
@@ -35,7 +33,8 @@ function registerProbeFilters() {
 	
 	// apply filter selected filter or auto-select overview
 	$selFilters = $("#probe-filters .selected")
-	if ($selFilters.count > 0) {
+
+	if ($selFilters.length > 0) {
 		$selFilters.find("a").click()
 	} else {
 		$("#probe-filters .overview a").click()

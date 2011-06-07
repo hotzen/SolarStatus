@@ -236,7 +236,7 @@ cmd    = smartctl_all
 order  = 65
 
 [probe-smart_devinfo]
-label = "Device Information"
-class = probe-smart
-cmd   = smartctl_info
+label  = "Device Information"
+class  = probe-smart
+cmd    = smartctl_info
 order  = 66
