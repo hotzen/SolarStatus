@@ -1,0 +1,7 @@
+The bundled lighttpd.conf uses /var/docroot as the default document-root directory.
+So extract the dist.zip to this directory
+
+Make the scripts readable and executable:
+  chmod 0555 ./scripts/*
+ 
+Configure conf.ini.php to suit your needs.
