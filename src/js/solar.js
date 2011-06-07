@@ -11,15 +11,16 @@ function registerProbeFilters() {
 		var $a = $(this)
 	
 		// select filter, deselect all others
-		$a.parent("li").addClass("selected").
-			siblings("li").removeClass("selected")
+		$a.parent("li").addClass("selected").siblings("li").removeClass("selected")
 
 		// hide all probes
-		$(".probe").hide()
+		$(".probe").hide().removeClass("hide")
 		
 		// split the filter, then add() its parts
 		var filters = $a.attr("data-filter").split(";")
-		var $probes = $(".probe").filter( filters[0] )
+		var $probes = $( filters[0] )
+		
+		console.log( $probes );
 		
 		for (var i=1; i<filters.length; ++i) {
 			$probes = $probes.add(filters[i])
@@ -32,8 +33,13 @@ function registerProbeFilters() {
 		return false
 	})
 	
-	// apply filter
-	$("#probe-filters .selected a").click()
+	// apply filter selected filter or auto-select overview
+	$selFilters = $("#probe-filters .selected")
+	if ($selFilters.count > 0) {
+		$selFilters.find("a").click()
+	} else {
+		$("#probe-filters .overview a").click()
+	}
 }
 
 function failProbe($probe, failure) {
