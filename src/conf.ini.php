@@ -1,10 +1,6 @@
 ; <?php exit; ?>
 script_dir = ./scripts
 
-; if a command contains a devset, it is splitted into multiple commands, each with one device of the devset.
-; the output of each command is separated from the other commands by the following directive, when shown in the probe's raw output
-cmd_output_sep = "\n---\n\n"
-
 ;################################################
 ; Support for nicstat <http://www.brendangregg.com/Perf/network.html#nicstat>
 ; comment out to disable

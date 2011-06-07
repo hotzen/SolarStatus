@@ -54,7 +54,6 @@ if (!isAuthorized($token)) {
 ?>
 <script type="text/javascript">
 var TOKEN = "<?php echo $token; ?>";
-var CMD_OUTPUT_SEP = "<?php echo $_SERVER['SOLAR_CONFIG']['CMD_OUTPUT_SEP']; ?>";
 </script>
 <?php
 unset($password, $challenge, $response, $token);
