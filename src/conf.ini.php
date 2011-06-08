@@ -24,6 +24,8 @@ smartctl   = /opt/smartmon/sbin/smartctl
 ; authentication - comment out to disable
 [auth]
 password = f00bar
+
+; used to generate hashs, tokens and challenges. please change it.
 secret   = 9d9c8a3fb07ccb2c7a56d2f89b2dee6f
 
 
