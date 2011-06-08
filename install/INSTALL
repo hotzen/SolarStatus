@@ -1,7 +1,20 @@
-The bundled lighttpd.conf uses /var/docroot as the default document-root directory.
-So extract the dist.zip to this directory
+Installing lighttpd & PHP5:
+  sudo pkg install lighttpd
+  sudo pkg install php-52 (or any newer version if available)
+
+Bundled Files:
+  - smf-svc-lighttpd.xml
+    service-descriptor for solaris SMF, see also:
+      http://redmine.lighttpd.net/wiki/1/LighttpdOnSolaris
+      http://blogs.oracle.com/mandy/entry/lighttpd_smf_troubles
+	 	
+  - lighttpd.conf
+    Configuration for lighttpd, enables SSL on Port 443 and Fast-CGI for PHP5.
+	Document-Root is /var/docroot, so extract the downloaded zip there.
+	see also:
+      http://redmine.lighttpd.net/wiki/1/Docs:SSL
 
 Make the scripts readable and executable:
-  chmod 0555 ./scripts/*
- 
+  chmod 0755 ./scripts/*
+  
 Configure conf.ini.php to suit your needs.
