@@ -20,20 +20,11 @@ if (isset($_GET["s"]) ) {
 	$script = $_GET["s"];
 	
 	try {
-		$output = execScript($script);
-
-		$scriptCmdLinesRaw = explode("\n", file_get_contents(getScriptPath($script)));
-		$scriptCmdLines    = array();
-		
-		foreach ($scriptCmdLinesRaw as $lineRaw) {
-			$line = trim($lineRaw);
-			if (strlen($line) > 0 && substr($line, 0, 1) != "#") {
-				$scriptCmdLines[] = $line;
-			}
-		}
-		$scriptCmd = implode("\n", $scriptCmdLines);
-		
+		$output    = execScript($script);
+		$scriptCmd = getScriptCmd($script);
+				
 		$res = array(
+			"token"  => generateToken(),
 			"script" => $script,
 			"time"	 => (time() * 1000),
 			"result" => array()
@@ -52,6 +43,7 @@ else if (isset($_GET["c"]) ) {
 	
 	try {
 		$res = array(
+			"token"  => generateToken(),
 			"cmd"    => $cmdID,
 			"time"	 => (time() * 1000),
 			"result" => array()

@@ -144,7 +144,7 @@ li, label, a, header, footer, h1, th, time {
 }
 
 .probe .raw {
-	min-height: 3em;
+	min-height: 35px;
 	max-height: 30em;
 	overflow: auto;
 }
@@ -184,7 +184,7 @@ li, label, a, header, footer, h1, th, time {
 .probe .data {
 	font-size: 0.8em;
 	margin: 5px;
-	min-height: 3em;
+	min-height: 35px;
 	max-height: 30em;
 	overflow: auto;
 }

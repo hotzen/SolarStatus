@@ -138,7 +138,7 @@ EOC;
 			<div class="failure hide"></div>
 		</header>
 		<div class="raw"></div>
-		<div class="data"></div>
+		<div class="data hide"></div>
 		<footer>
 			<time datetime="" data-timestamp=""></time>
 		</footer>

@@ -15,8 +15,6 @@ function execRaw($cmd, &$rc = NULL) {
 }
 
 function getScriptPath($script) {
-	$error = NULL;
-	
 	if (!preg_match('#^[a-z0-9_]+$#', $script))
 		throw new Exception("invalid script '${script}'");
 
@@ -29,6 +27,26 @@ function getScriptPath($script) {
 		throw new Exception("script '${path}' is not executable");
 		
 	return $path;
+}
+
+function getScriptCmd($script) {
+	$path     = getScriptPath($script);
+	$rawLines = explode("\n", file_get_contents($path));
+	$lines    = array();
+	
+	foreach ($rawLines as $rawLine) {
+		$line = trim($rawLine);
+		
+		if (strlen($line) == 0)
+			continue;
+			
+		if (substr($line, 0, 1) == "#")
+			continue;
+		
+		$lines[] = $line;
+	}
+	
+	return implode("\n", $lines);
 }
 
 function getCommand($cmdID) {

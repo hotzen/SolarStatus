@@ -51,15 +51,20 @@ function isAuthorized(&$token = NULL) {
 	if (!isset($_SERVER['SOLAR_CONFIG']['AUTH']))
 		return true;
 	
+	// not passed, fetch from request
+	if (!isset($token) && isset($_REQUEST['t'])) {
+		$token = $_REQUEST['t'];
+	}
+	
 	// try passed token
 	if (isset($token)) {
-		return checkToken($token);
-	}
+		$auth = checkToken($token);
 		
-	// try request
-	if (isset($_REQUEST['t'])) {
-		$token = $_REQUEST['t'];
-		return checkToken($token);
+		// generate new token
+		if ($auth)
+			$token = generateToken();
+		
+		return $auth;
 	}
 	
 	// fail
@@ -75,13 +80,25 @@ function generateExpectedResponse($challenge) {
 	return sha1( $challenge . $_SERVER['SOLAR_CONFIG']['AUTH']['PASSWORD'] );
 }
 
-function generateToken() {
+// function generateToken() {
+	// $secret = $_SERVER['SOLAR_CONFIG']['AUTH']['SECRET'];
+	// $hours  = round(time() / (3 * 3600));
+	// $ip     = $_SERVER['REMOTE_ADDR'];
+	// $ua     = $_SERVER['HTTP_USER_AGENT'];
+	
+	// return sha1( $secret . $hours . $ip . $ua );
+// }
+
+function generateToken($time = NULL) {
+	if ($time === NULL)
+		$time = time();
+
 	$secret = $_SERVER['SOLAR_CONFIG']['AUTH']['SECRET'];
-	$hours  = round(time() / (3 * 3600));
+	$time   = dechex( $time );
 	$ip     = $_SERVER['REMOTE_ADDR'];
 	$ua     = $_SERVER['HTTP_USER_AGENT'];
 	
-	return sha1( $secret . $hours . $ip . $ua );
+	return $time . '$' . sha1( $time . $ip . $ua . $secret );
 }
 
 function checkToken($t) {
@@ -89,8 +106,20 @@ function checkToken($t) {
 	// auth disabled
 	if (!isset($_SERVER['SOLAR_CONFIG']['AUTH']))
 		return true;
-
-	return ($t == generateToken());
+	
+	$ps = explode('$', $t);
+	if (count($ps) != 2)
+		return false;
+	
+	// check expiration
+	$time   = hexdec($ps[0]);
+	$dur    = time() - $time;
+	$expire = (int)$_SERVER['SOLAR_CONFIG']['AUTH']['EXPIRE'];
+				
+	if ($dur > $expire)
+		return false;
+		
+	return ($t == generateToken($time));
 }
 
 function reloadTokenized($t) {

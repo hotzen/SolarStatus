@@ -28,6 +28,9 @@ password = f00bar
 ; used to generate hashs, tokens and challenges. please change it.
 secret   = 9d9c8a3fb07ccb2c7a56d2f89b2dee6f
 
+; time after a token is expired, the token is refreshed each time
+; SolarStatus is reloaded or an AJAX-request is successfully executed
+expire = 300
 
 ;################################################
 ; device-sets, where each set contains N devices.

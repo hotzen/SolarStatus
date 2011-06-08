@@ -155,11 +155,14 @@ function refreshProbe($probe) {
 		var $raw = $probe.children(".raw").html("")
 		var resArr  = data["result"]
 		
-		var firstIdx = 0
-		var lastIdx  = resArr.length - 1
+		// use new token
+		if (data["token"]) {
+			TOKEN = data["token"]
+		}
 		
 		for (var i=0; i<resArr.length; ++i) {
 			var res = resArr[i]
+			
 			var resCmd    = res[0]
 			var resOutArr = res[1]
 			var resOut    = resOutArr.join("\n")
@@ -171,9 +174,9 @@ function refreshProbe($probe) {
 			// trigger probe-event
 			$probe.trigger('probe', [id, resCmd, resOutArr, containerElem, parserCallback])
 			
-			if (i == firstIdx)
+			if (i == 0)
 				$rawRes.addClass("first")
-			if (i == lastIdx)
+			if (i == resArr.length-1)
 				$rawRes.addClass("last")
 		}
 								
