@@ -22,13 +22,16 @@ Bundled 'install' Directory:
 	
 Configuring SolarStatus:
 	see conf.ini.php, that's it.
-	
+
 Feedback appreciated: kai@meder.info
 
 Screenshot: https://github.com/hotzen/SolarStatus/raw/master/screenshots/custom-filter.png
 Download:   https://github.com/hotzen/SolarStatus/raw/master/dist/SolarStatus_0.3.zip
 
-Thanks
+Cheers,
+Kai
+
+I put SolarStatus under the MIT License, see the attached LICENSE file.
 
 Changelog:
 07.06.11  fixed broken command-execution
