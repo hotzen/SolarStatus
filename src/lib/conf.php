@@ -8,7 +8,7 @@ function loadConfig() {
 
 function parseIniFile($file) {
 	if (!is_readable($file))
-		die("Config-File not readable");
+		throw new Exception("Config-File not readable");
 
 	$ini = parse_ini_file($file, true);
 	if (!$ini)
@@ -31,7 +31,7 @@ function parseIniFile($file) {
 			$devSetID = (int)$matches[1];
 
 			if (!isset($sectionConf['DEV']))
-				throw new Exception("DevSet '${section}' does not have DEV[] directive");
+				throw new Exception("DevSet '${section}' without DEV[] directive");
 			
 			$conf['DEVSETS'][$devSetID] = $sectionConf['DEV'];
 		}
@@ -41,10 +41,10 @@ function parseIniFile($file) {
 			$filterID = (int)$matches[1];
 
 			if (!isset($sectionConf['LABEL']))
-				throw new Exception("Filter '${filterID}' without LABEL directive");
+				throw new Exception("Filter '${section}' without LABEL directive");
 			
 			if (!isset($sectionConf['SELECTOR']))
-				throw new Exception("Filter '${filterID}' without SELECTOR directive");
+				throw new Exception("Filter '${section}' without SELECTOR directive");
 			
 			$conf['FILTERS'][$filterID] = $sectionConf;
 		}
@@ -54,13 +54,13 @@ function parseIniFile($file) {
 			$probeID = strtolower($matches[1]);
 
 			if (!isset($sectionConf['SCRIPT']) && !isset($sectionConf['CMD']))
-				throw new Exception("Probe '${probeID}' without neither SCRIPT nor CMD directive");
-				
+				throw new Exception("Probe '${section}' without neither SCRIPT nor CMD directive");
+			
 			if (isset($sectionConf['SCRIPT']) && isset($sectionConf['CMD']))
-				throw new Exception("Probe '${probeID}' with both SCRIPT and CMD directive");
+				throw new Exception("Probe '${section}' with both SCRIPT and CMD directive");
 			
 			if (!isset($sectionConf['LABEL']))
-				throw new Exception("Probe '${probeID}' without LABEL directive");
+				throw new Exception("Probe '${section}' without LABEL directive");
 			
 			if (isset($sectionConf['ORDER'])) {
 				$sectionConf['ORDER'] = (int)$sectionConf['ORDER'];

@@ -17,9 +17,9 @@ if (!isAuthorized()) {
 
 // SCRIPT
 if (isset($_GET["s"]) ) {
-	$script = $_GET["s"];
-	
 	try {
+		$script = $_GET["s"];
+		
 		$output    = execScript($script);
 		$scriptCmd = getScriptCmd($script);
 				
@@ -39,9 +39,9 @@ if (isset($_GET["s"]) ) {
 
 // COMMAND
 else if (isset($_GET["c"]) ) {
-	$cmdID = $_GET["c"];
-	
 	try {
+		$cmdID = $_GET["c"];
+		
 		$res = array(
 			"token"  => generateToken(),
 			"cmd"    => $cmdID,
@@ -64,5 +64,5 @@ else if (isset($_GET["c"]) ) {
 }
 
 else {
-	echo jsonError( "NO_INPUT" );
+	jsonError( "NO_INPUT" );
 }

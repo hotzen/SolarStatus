@@ -163,7 +163,7 @@ function refreshProbe($probe) {
 		for (var i=0; i<resArr.length; ++i) {
 			var res = resArr[i]
 			
-			var resCmd    = res[0]
+			var resCmd    = res[0].replace(/\n/g, "&nbsp;&crarr; ") // replace NL in multiline commands with carriage-return-style arrow
 			var resOutArr = res[1]
 			var resOut    = resOutArr.join("\n")
 			

@@ -3,7 +3,6 @@
 require 'lib/conf.php';
 require 'lib/auth.php';
 require 'lib/common.php';
-require 'lib/probes.php';
 ?>
 <html>
 <head>

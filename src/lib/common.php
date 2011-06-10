@@ -29,7 +29,7 @@ function getScriptPath($script) {
 	return $path;
 }
 
-function getScriptCmd($script) {
+function getScriptCmd($script, $lineSep = "\n") {
 	$path     = getScriptPath($script);
 	$rawLines = explode("\n", file_get_contents($path));
 	$lines    = array();
@@ -46,7 +46,7 @@ function getScriptCmd($script) {
 		$lines[] = $line;
 	}
 	
-	return implode("\n", $lines);
+	return implode($lineSep, $lines);
 }
 
 function getCommand($cmdID) {
@@ -151,9 +151,10 @@ function splitTrim($str, $sep, $isRegex = false) {
 }
 
 function displayException(Exception $e) {
+	$clazz = get_class($e);
 	$msg   = $e->getMessage();
 	$trace = $e->getTraceAsString();
-	echo "<h1>An Exception was raised</h1>";
+	echo "<h1>The Exception ${clazz} was raised</h1>";
 	echo "<h3>${msg}</h3>";
 	echo "<pre>${trace}</pre>";
 }
