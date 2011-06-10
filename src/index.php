@@ -51,7 +51,12 @@ if (!isAuthorized($token)) {
 }
 
 ?>
-<script type="text/javascript"> var TOKEN = "<?php echo $token; ?>"; </script>
+<script type="text/javascript">
+window.SOLAR = {
+	  SELF:  "<?php echo $_SERVER['PHP_SELF']; ?>"
+	, TOKEN: "<?php echo $token; ?>"
+}
+</script>
 <?php unset($password, $challenge, $response, $token); ?>
 
 

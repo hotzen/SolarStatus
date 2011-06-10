@@ -1,5 +1,4 @@
 $(document).ready(function() {
-	
 	registerProbeRefresh()
 	registerProbeViews()
 	registerProbeFilters()
@@ -155,9 +154,15 @@ function refreshProbe($probe) {
 		var $raw = $probe.children(".raw").html("")
 		var resArr  = data["result"]
 		
-		// use new token
-		if (data["token"]) {
-			TOKEN = data["token"]
+		// update token
+		if (data["token"] && data["token"] != SOLAR.TOKEN) {
+			SOLAR.TOKEN = data["token"]
+			
+			// update url-bar
+			if (window.history.replaceState) {
+				var newTokenPath = SOLAR.SELF + "?t=" + SOLAR.TOKEN
+				window.history.replaceState(SOLAR.TOKEN, "Token Refreshed", newTokenPath);
+			}
 		}
 		
 		for (var i=0; i<resArr.length; ++i) {
@@ -201,7 +206,7 @@ function refreshProbe($probe) {
 	var cmd    = $probe.attr("data-cmd")
 	var time   = (new Date()).getTime()
 	
-	var url = "./exec.php?t=" + TOKEN + "&ts=" + time
+	var url = "./exec.php?t=" + SOLAR.TOKEN + "&ts=" + time
 	
 	if (script.length > 0)
 		url += "&s=" + script
