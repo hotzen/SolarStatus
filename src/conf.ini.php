@@ -58,8 +58,9 @@ dev[] = /dev/rdsk/c8t3d0p0
 [commands]
 ; echo_devset1  = "echo %DEVSET-1"
 
-smartctl_info = "%SMARTCTL --info -d sat %DEVSET-1"
-smartctl_all  = "%SMARTCTL --all -d sat %DEVSET-1"
+smartctl_health  = "%SMARTCTL --health -d sat,12 %DEVSET-1"
+smartctl_info = "%SMARTCTL --info -d sat,12 %DEVSET-1"
+smartctl_all  = "%SMARTCTL --all -d sat,12 %DEVSET-1"
 
 ; TODO
 ; smartctl_temp = "..."
@@ -234,8 +235,15 @@ class  = probe-hw
 script = prtdiag
 order  = 71
 
+[probe-smart_health]
+label  = "S.M.A.R.T Health"
+class  = probe-smart
+cmd    = smartctl_health
+order  = 64
+
+
 [probe-smart_all]
-label  = "S.M.A.R.T"
+label  = "S.M.A.R.T Information"
 class  = probe-smart
 cmd    = smartctl_all
 order  = 65
