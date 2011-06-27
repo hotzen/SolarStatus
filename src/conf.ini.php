@@ -14,9 +14,7 @@ nicstat = nicstat
 ;     http://sourceforge.net/apps/trac/smartmontools/wiki/Powermode
 ; comment out to disable
 ;
-; smartmon requires raw disk access via /dev/rdsk/ !
-; if "zpool status" lists the disk cXtYdZ,
-; the valid smartmon device-path is /dev/rdsk/cXtYdZp0 (note the p0 to denote the "whole" disk)
+; smartmon requires raw disk access via /dev/rdsk/, see man-page link above!
 smartctl   = /opt/smartmon/sbin/smartctl
 
 
@@ -43,9 +41,14 @@ dev[] = /dev/rdsk/c8t0d0s0
 
 ; device-set #1: HDD/Storage
 [devset-1]
-dev[] = /dev/rdsk/c8t1d0p0
-dev[] = /dev/rdsk/c8t2d0p0
-dev[] = /dev/rdsk/c8t3d0p0
+;dev[] = /dev/rdsk/c8t1d0p0
+;dev[] = /dev/rdsk/c8t2d0p0
+;dev[] = /dev/rdsk/c8t3d0p0
+dev[] = /dev/rdsk/c8t1d0
+dev[] = /dev/rdsk/c8t2d0
+dev[] = /dev/rdsk/c8t3d0
+
+
 
 ;################################################
 ; COMMANS, where each command may use the folling variables/macros:
@@ -61,6 +64,10 @@ dev[] = /dev/rdsk/c8t3d0p0
 smartctl_health  = "%SMARTCTL --health -d sat,12 %DEVSET-1"
 smartctl_info = "%SMARTCTL --info -d sat,12 %DEVSET-1"
 smartctl_all  = "%SMARTCTL --all -d sat,12 %DEVSET-1"
+
+smartctl_test_short = "echo TODO expensive-flag %SMARTCTL -t short -d sat,12 %DEVSET-1"
+smartctl_test_long  = "echo TODO expensive-flag %SMARTCTL -t long -d sat,12 %DEVSET-1"
+
 
 ; TODO
 ; smartctl_temp = "..."
@@ -241,7 +248,6 @@ class  = probe-smart
 cmd    = smartctl_health
 order  = 64
 
-
 [probe-smart_all]
 label  = "S.M.A.R.T Information"
 class  = probe-smart
@@ -253,3 +259,17 @@ label  = "Device Information"
 class  = probe-smart
 cmd    = smartctl_info
 order  = 66
+
+[probe-smart_test_short]
+label  = "S.M.A.R.T. Short Self-Test"
+class  = probe-smart
+cmd    = smartctl_test_short
+order  = 67
+expensive = true
+
+[probe-smart_test_long]
+label  = "S.M.A.R.T. Long Self-Test"
+class  = probe-smart
+cmd    = smartctl_test_long
+order  = 68
+expensive = true
