@@ -24,13 +24,6 @@ I put SolarStatus under the MIT License, see the attached LICENSE file.
 
 
 Roadmap:
-- optimize script-outputs
-- work on predefined SMARTmon commands
-- parse the output of all bundled scripts and transform to machine-readable data
+- parse the output of all(?) bundled scripts and transform to machine-readable data
 - extract metrics from parsed data to generate overview-page, showing CPU, Mem, I/O, etc.
 - enhance metrics with jquery-sparklines or other graphing solution
-
-
-Changelog:
-07.06.11  fixed broken command-execution
-          reworked display of raw-output

@@ -61,17 +61,16 @@ dev[] = /dev/rdsk/c8t3d0
 [commands]
 ; the sat,12 device-parameter results in dmesg: "Error for Command: <undecoded cmd 0xa1>    Error Level: Recovered"
 ; see http://sourceforge.net/mailarchive/message.php?msg_id=27470552
-;smartctl_health = "%SMARTCTL --health --device=sat,12 %DEVSET-1"
+;smartctl_health = "%SMARTCTL --health -d sat,12 %DEVSET-1"
+smartctl_health = "%SMARTCTL --health -d scsi %DEVSET-1"
 
-smartctl_health = "%SMARTCTL --health --device=scsi %DEVSET-1"
+smartctl_temp   = "%SMARTCTL --attributes -d sat,12 %DEVSET-1 | grep -i temperature"
+smartctl_attr   = "%SMARTCTL --attributes -d sat,12 %DEVSET-1"
+smartctl_info   = "%SMARTCTL --info -d sat,12 %DEVSET-1"
+smartctl_all    = "%SMARTCTL --all -d sat,12 %DEVSET-1"
 
-smartctl_temp   = "%SMARTCTL --attributes --device=sat,12 %DEVSET-1 | grep -i temperature"
-smartctl_attr   = "%SMARTCTL --attributes --device=sat,12 %DEVSET-1"
-smartctl_info   = "%SMARTCTL --info --device=sat,12 %DEVSET-1"
-smartctl_all    = "%SMARTCTL --all --device=sat,12 %DEVSET-1"
-
-smartctl_test_short = "%SMARTCTL -t short --device=sat,12 %DEVSET-1"
-smartctl_test_long  = "%SMARTCTL -t long --device=sat,12 %DEVSET-1"
+smartctl_test_short = "%SMARTCTL -t short -d sat,12 %DEVSET-1"
+smartctl_test_long  = "%SMARTCTL -t long -d sat,12 %DEVSET-1"
 
 ; echo_devset1  = "echo %DEVSET-1"
 
