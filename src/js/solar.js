@@ -15,17 +15,12 @@ function registerProbeFilters() {
 		// hide all probes & overview
 		$(".probe").add("#overview").hide().removeClass("hide")
 		
-		// split the filter, then add() its parts
-		var filters = $a.attr("data-filter").split(";")
-		var $probes = $( filters[0] )
-			
-		for (var i=1; i<filters.length; ++i) {
-			$probes = $probes.add(filters[i])
-		}
-		
-		// show filtered probes and refresh
-		$probes.slideDown("slow").find(".refresh").click()
+		var filters = $a.attr("data-filter")
+		var $probes = $( filters )
 				
+		// show filtered probes and refresh non-confirm probes
+		$probes.not(".sliding").addClass("sliding").slideDown("slow").removeClass("sliding").not(".confirm").find(".refresh").click()
+						
 		// stop event-bubbling of link-click
 		return false
 	})
@@ -97,8 +92,8 @@ function autoRefresher() {
 		return
 	}
 		
-	// refresh all visible probes
-	$(".probe:visible").each(function() {
+	// refresh all visible, non-confirmable probes
+	$(".probe:visible").not(".confirm").each(function() {
 		refreshProbe( $(this) )
 	})
 	
@@ -115,7 +110,19 @@ function refreshProbe($probe) {
 			console.warn(["already loading, skipping refresh", $probe.attr("id")])
 		return
 	}
-	
+		
+	if ($probe.hasClass("confirm")) {
+		var name = $probe.find("header h1").text()
+		var text = $probe.attr("data-confirm")
+		
+		if (confirm("Please confirm to refresh the probe\n  " + name + "\n\n" + text)) {
+			$probe.addClass("confirm-allowed")
+		} else {
+			$probe.addClass("confirm-denied")
+			return
+		}
+	}
+		
 	// set loading state
 	$probe.addClass("loading")
 
@@ -170,7 +177,7 @@ function refreshProbe($probe) {
 			
 			var resCmd    = res[0].replace(/\n/g, "&nbsp;&crarr; ") // replace NL in multiline commands with carriage-return-style arrow
 			var resOutArr = res[1]
-			var resOut    = resOutArr.join("\n")
+			var resOut    = resOutArr.join("\n").replaceEntities()
 			
 			var $rawRes = $( document.createElement("div") ).appendTo( $raw ).addClass("result")
 			$( document.createElement("code") ).appendTo( $rawRes ).html( resCmd )

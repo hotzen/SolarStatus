@@ -119,6 +119,18 @@ EOC;
 		} else {
 			$probeClazzes = array();
 		}
+		
+		if (isset($probeConf['CONFIRM'])) {
+			$probeClazzes[] = "confirm";
+			$confirmText = trim($probeConf['CONFIRM']);
+			$confirmData = <<<EOC
+<div class="result last"><code>This probe must be explicitly refreshed to show any data</code><pre></pre></div>
+EOC;
+		} else {
+			$confirmText = "";
+			$confirmData = "";
+		}
+		
 		$probeClazz = implode(' ', $probeClazzes);
 		
 		// SCRIPT / CMD
@@ -131,7 +143,7 @@ EOC;
 		
 		// OUTPUT
 		echo <<<EOC
-	<div id="${probeID}" class="probe ${probeClazz} hide" data-script="${script}" data-cmd="${cmdID}">
+	<div id="${probeID}" class="probe ${probeClazz} hide" data-script="${script}" data-cmd="${cmdID}" data-confirm="${confirmText}">
 		<header>
 			<h1>${label}</h1>
 			<ul class="view-selector">
@@ -141,7 +153,7 @@ EOC;
 			<a href="#refresh" class="refresh" title="refresh data"></a>
 			<div class="failure hide"></div>
 		</header>
-		<div class="raw"></div>
+		<div class="raw">${confirmData}</div>
 		<div class="data hide"></div>
 		<footer>
 			<time datetime="" data-timestamp=""></time>

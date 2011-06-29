@@ -5,6 +5,10 @@
 	// );
 // }
 
+String.prototype.replaceEntities = function() {
+	return this.replace(/</g, "&lt;").replace(/>/g, "&gt;") // .replace(/"/g, "&quot;")
+}
+
 function dateTimeXSD(ts) {
 	var DATE_SEP = "-";
 	var TIME_SEP = ":";

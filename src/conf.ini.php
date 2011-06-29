@@ -59,18 +59,21 @@ dev[] = /dev/rdsk/c8t3d0
 ; each command-section begins with "command-", followed by the command's id
 
 [commands]
+; the sat,12 device-parameter results in dmesg: "Error for Command: <undecoded cmd 0xa1>    Error Level: Recovered"
+; see http://sourceforge.net/mailarchive/message.php?msg_id=27470552
+;smartctl_health = "%SMARTCTL --health --device=sat,12 %DEVSET-1"
+
+smartctl_health = "%SMARTCTL --health --device=scsi %DEVSET-1"
+
+smartctl_temp   = "%SMARTCTL --attributes --device=sat,12 %DEVSET-1 | grep -i temperature"
+smartctl_attr   = "%SMARTCTL --attributes --device=sat,12 %DEVSET-1"
+smartctl_info   = "%SMARTCTL --info --device=sat,12 %DEVSET-1"
+smartctl_all    = "%SMARTCTL --all --device=sat,12 %DEVSET-1"
+
+smartctl_test_short = "%SMARTCTL -t short --device=sat,12 %DEVSET-1"
+smartctl_test_long  = "%SMARTCTL -t long --device=sat,12 %DEVSET-1"
+
 ; echo_devset1  = "echo %DEVSET-1"
-
-smartctl_health  = "%SMARTCTL --health -d sat,12 %DEVSET-1"
-smartctl_info = "%SMARTCTL --info -d sat,12 %DEVSET-1"
-smartctl_all  = "%SMARTCTL --all -d sat,12 %DEVSET-1"
-
-smartctl_test_short = "echo TODO expensive-flag %SMARTCTL -t short -d sat,12 %DEVSET-1"
-smartctl_test_long  = "echo TODO expensive-flag %SMARTCTL -t long -d sat,12 %DEVSET-1"
-
-
-; TODO
-; smartctl_temp = "..."
 
 
 ;################################################
@@ -79,17 +82,17 @@ smartctl_test_long  = "echo TODO expensive-flag %SMARTCTL -t long -d sat,12 %DEV
 ;
 ; the following directives can be used:
 ;   label      The label of the filter, required
-;   selector   CSS-selector, multiple selectors separated by ; are logically OR-ed, required
+;   selector   CSS-selector, separate multiple selectors with comma (,)
 ;   default    Use the filter by default, optional
 
 [filter-1]
 label    = "CPU, I/O, TOP, NIC"
-selector = "#mpstat; #zpool_iostat; #top; #nicstat"
+selector = "#mpstat, #zpool_iostat, #top, #nicstat"
 default  = true
 
 [filter-2]
 label    = "Health"
-selector = "#svcs_x; #dmesg"
+selector = "#svcs_x, #dmesg, #smart_health"
 
 [filter-10]
 label    = "CPU"
@@ -223,6 +226,7 @@ label  = "Messages (/var/adm/messages)"
 class  = probe-logs
 script = adm_msgs
 order  = 61
+confirm = "Display?"
 
 [probe-cpu_freq]
 label  = "CPU Current Frequency"
@@ -232,7 +236,7 @@ order  = 12
 
 [probe-cpu_supported_freq]
 label  = "CPU Supported Frequencies"
-class  = "probe-cpu probe-hw"
+class  = probe-hw
 script = cpu_supported_freq
 order  = 70
 
@@ -246,30 +250,44 @@ order  = 71
 label  = "S.M.A.R.T Health"
 class  = probe-smart
 cmd    = smartctl_health
-order  = 64
+order  = 81
+
+[probe-smart_temp]
+label  = "S.M.A.R.T Temperature"
+class  = probe-smart
+cmd    = smartctl_temp
+order  = 82
+
+[probe-smart_attr]
+label  = "S.M.A.R.T Attributes"
+class  = probe-smart
+cmd    = smartctl_attr
+order  = 83
 
 [probe-smart_all]
 label  = "S.M.A.R.T Information"
 class  = probe-smart
 cmd    = smartctl_all
-order  = 65
+order  = 84
+confirm = "Display?"
 
 [probe-smart_devinfo]
 label  = "Device Information"
 class  = probe-smart
 cmd    = smartctl_info
-order  = 66
+order  = 85
+confirm = "Display?"
 
 [probe-smart_test_short]
 label  = "S.M.A.R.T. Short Self-Test"
 class  = probe-smart
 cmd    = smartctl_test_short
-order  = 67
-expensive = true
+order  = 91
+confirm = "Perform a short Self-Test?"
 
 [probe-smart_test_long]
 label  = "S.M.A.R.T. Long Self-Test"
 class  = probe-smart
 cmd    = smartctl_test_long
-order  = 68
-expensive = true
+order  = 92
+confirm = "Perform a long Self-Test?"

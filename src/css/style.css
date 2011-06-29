@@ -192,7 +192,7 @@ li, label, a, header, footer, h1, th, time {
 .loading {
 	background-image: url(../img/spinner.gif);
 	background-repeat: no-repeat;
-	background-position: right 2em;
+	background-position: 95% 2em;
 }
 
 .probe header .view-selector {
