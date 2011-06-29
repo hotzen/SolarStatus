@@ -69,8 +69,9 @@ smartctl_attr   = "%SMARTCTL --attributes -d sat,12 %DEVSET-1"
 smartctl_info   = "%SMARTCTL --info -d sat,12 %DEVSET-1"
 smartctl_all    = "%SMARTCTL --all -d sat,12 %DEVSET-1"
 
-smartctl_test_short = "%SMARTCTL -t short -d sat,12 %DEVSET-1"
-smartctl_test_long  = "%SMARTCTL -t long -d sat,12 %DEVSET-1"
+smartctl_test_res   = "%SMARTCTL --log=selftest -d sat,12 %DEVSET-1"
+smartctl_test_short = "%SMARTCTL --test=short -d sat,12 %DEVSET-1"
+smartctl_test_long  = "%SMARTCTL --test=long -d sat,12 %DEVSET-1"
 
 ; echo_devset1  = "echo %DEVSET-1"
 
@@ -277,16 +278,23 @@ cmd    = smartctl_info
 order  = 85
 confirm = "Display?"
 
+[probe-smart_test_res]
+label  = "S.M.A.R.T. Self-Test Results"
+class  = probe-smart
+cmd    = smartctl_test_res
+order  = 91
+confirm = "Display?"
+
 [probe-smart_test_short]
 label  = "S.M.A.R.T. Short Self-Test"
 class  = probe-smart
 cmd    = smartctl_test_short
-order  = 91
+order  = 92
 confirm = "Perform a short Self-Test?"
 
 [probe-smart_test_long]
 label  = "S.M.A.R.T. Long Self-Test"
 class  = probe-smart
 cmd    = smartctl_test_long
-order  = 92
-confirm = "Perform a long Self-Test?"
+order  = 93
+confirm = "Perform a LONG Self-Test?"
