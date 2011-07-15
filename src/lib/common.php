@@ -6,8 +6,12 @@ function execScript($script, &$rc = NULL) {
 // UNCHECKED & UNSAFE
 function execRaw($cmd, &$rc = NULL) {
 	$rc = NULL;
-	exec($cmd, $lines, $rc);
 	
+	exec($cmd, $lines, $rc);
+	// $out = shell_exec($cmd);
+	// $rc = 0;
+	// $lines = explode("\n", trim($out));
+		
 	// if ($rc != 0)
 	//     throw new Exception("command '${cmd}' failed with code ${rc}");
 	

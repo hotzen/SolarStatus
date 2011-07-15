@@ -51,7 +51,7 @@ dev[] = /dev/rdsk/c8t3d0
 
 
 ;################################################
-; COMMANS, where each command may use the folling variables/macros:
+; COMMANDS, where each command may use the folling variables/macros:
 ; 	%DEVSET-<ID>   a set of devices, configured above
 ; 	%SMARTCTL	   the path to smartctl, if configured above,
 ;	%NICSTAT	   the path to nicstat, if configured above
@@ -62,7 +62,9 @@ dev[] = /dev/rdsk/c8t3d0
 ; the sat,12 device-parameter results in dmesg: "Error for Command: <undecoded cmd 0xa1>    Error Level: Recovered"
 ; see http://sourceforge.net/mailarchive/message.php?msg_id=27470552
 ;smartctl_health = "%SMARTCTL --health -d sat,12 %DEVSET-1"
+
 smartctl_health = "%SMARTCTL --health -d scsi %DEVSET-1"
+;smartctl_health = "%SMARTCTL --health -d scsi %DEVSET-1 | tail -n +4"
 
 smartctl_temp   = "%SMARTCTL --attributes -d sat,12 %DEVSET-1 | grep -i temperature"
 smartctl_attr   = "%SMARTCTL --attributes -d sat,12 %DEVSET-1"
@@ -184,6 +186,12 @@ label  = "ZFS Filesystems"
 class  = probe-zfs
 script = zfs
 order  = 33
+
+[probe-zfs_snaps]
+label  = "ZFS Snapshots"
+class  = probe-zfs
+script = zfs_snaps
+order  = 34
 
 [probe-svcs_x]
 label  = "Service-Problems"
