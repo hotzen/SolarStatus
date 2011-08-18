@@ -16,16 +16,22 @@ function registerProbeFilters() {
 		$(".probe").add("#overview").hide().removeClass("hide")
 		
 		var filters = $a.attr("data-filter")
-		var $probes = $( filters )
-				
-		// show filtered probes and refresh non-confirm probes
-		$probes.not(".sliding").addClass("sliding").slideDown("slow").removeClass("sliding").not(".confirm").find(".refresh").click()
-						
+		
+		// handle special case: generate the overview
+		if (filters == "#overview") {
+			requestOverview()
+		} else {
+			var $probes = $( filters )
+			
+			// show filtered probes and refresh non-confirm probes
+			$probes.not(".sliding").addClass("sliding").slideDown("slow").removeClass("sliding").not(".confirm").find(".refresh").click()
+		}
+		
 		// stop event-bubbling of link-click
 		return false
 	})
 	
-	// apply filter selected filter or auto-select overview
+	// apply selected filter or auto-select overview
 	$selFilters = $("#probe-filters .selected")
 
 	if ($selFilters.length > 0) {
@@ -111,7 +117,7 @@ function refreshProbe($probe) {
 		return
 	}
 		
-	if ($probe.hasClass("confirm")) {
+	if ($probe.hasClass("confirm") && !$probe.hasClass("force-refresh")) {
 		var name = $probe.find("header h1").text()
 		var text = $probe.attr("data-confirm")
 		
@@ -122,6 +128,9 @@ function refreshProbe($probe) {
 			return
 		}
 	}
+	
+	// remove forced refresh for next time
+	$probe.removeClass("force-refresh")
 		
 	// set loading state
 	$probe.addClass("loading")
@@ -137,8 +146,7 @@ function refreshProbe($probe) {
 			$probe.find(".view-selector li.view-data a").click()
 		}
 	}
-	
-	
+		
 	var onSuccess = function(data, textStatus, xhr) {
 		// check if error is returned
 		if (data.error) {
@@ -183,13 +191,21 @@ function refreshProbe($probe) {
 			$( document.createElement("code") ).appendTo( $rawRes ).html( resCmd )
 			$( document.createElement("pre")  ).appendTo( $rawRes ).html( resOut )
 			
+			if (i % 2 == 0)
+				$rawRes.addClass("even")
+			else
+				$rawRes.addClass("odd")
+			
+			if (i == 0) 
+				$rawRes.addClass("first")
+			else if (i == resArr.length-1)
+				$rawRes.addClass("last")
+			
+			// generate Solar-Overview for this probe
+			generateOverview(id, resOutArr)
+						
 			// trigger probe-event
 			$probe.trigger('probe', [id, resCmd, resOutArr, containerElem, parserCallback])
-			
-			if (i == 0)
-				$rawRes.addClass("first")
-			if (i == resArr.length-1)
-				$rawRes.addClass("last")
 		}
 								
 		// apply view
@@ -230,6 +246,61 @@ function refreshProbe($probe) {
 		, success:	onSuccess
 		, error: 	onError
 	})
+}
+
+function requestOverview() {
+	var $overview = $( "#overview" )
+	var $overviewList = $overview.find("ul")
+	console.log( $overviewList.length )
+	
+	var cssID = function(name) { return "#" + name }
+	var probes = solov_probes().map(cssID).join(", ")
+		
+	if (probes.length == 0) {
+		if (console && console.warn)
+			console.warn("solov_probes() did not specify any probes, aborting overview")
+		return
+	}
+	
+	var $probes = $( probes )
+
+	// clear overview
+	$overviewList.empty()
+		
+	// refresh probes
+	$probes.find(".refresh").click()
+	
+	// slowly begin to show overview
+	$overview.fadeIn( "slow" )
+}
+
+
+function generateOverview(probe, data) {
+	var $overviewList = $( "#overview ul" )
+	
+	try {
+		var fn = "solov_process_" + probe
+		if (typeof(window[fn]) === 'undefined') {
+			if (console && console.log)
+				console.log(["no solov_process_<probe> defined for probe", probe])
+			return
+		}
+		
+		var res = window[fn](data)
+		
+		// add each result-item as a <li>
+		for (var i=0; i<res.length; i++) {
+			var item = res[i]
+			var $li  = $("<li></li>")
+			$li.append( $("<label></label>").text( item[0] ) )
+			$li.append( item[1] )
+		
+			$overviewList.append( $li )
+		}
+	} catch(ex) {
+		if (console && console.error)
+			console.error(["solov_generate failed on probe", id, (ex.toString) ? ex.toString() : ex])
+	}
 }
 
 

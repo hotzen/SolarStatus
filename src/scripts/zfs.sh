@@ -1,1 +1,1 @@
-zfs list -o name,used,avail,mountpoint,sharesmb,sharenfs
+zfs list -t fs -o name,used,avail,mountpoint,sharesmb,sharenfs,keystatus

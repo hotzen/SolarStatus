@@ -164,7 +164,7 @@ script = zpool_iostat
 order  = 21
 
 [probe-nicstat]
-label  = "Network-Interfaces (<a href=\"http://www.brendangregg.com/K9Toolkit/nicstat.c\">nicstat</a>)"
+label  = "Network-Interfaces (<a href="http://www.brendangregg.com/K9Toolkit/nicstat.c">nicstat</a>)"
 class  = probe-io
 script = nicstat
 order  = 22

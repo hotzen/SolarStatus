@@ -5,8 +5,23 @@
 	// );
 // }
 
+if(typeof(console) === 'undefined') {
+    var console = {}
+    var logger  = function() {};
+	console.log = console.error = console.info = console.debug = console.warn = logger
+	console.trace = console.dir = console.dirxml = console.group = console.groupEnd = console.time = console.timeEnd = console.assert = console.profile = logger
+}
+
 String.prototype.replaceEntities = function() {
 	return this.replace(/</g, "&lt;").replace(/>/g, "&gt;") // .replace(/"/g, "&quot;")
+}
+
+String.prototype.splitBlanks = function() {
+	return this.replace(/^\s+/, "").replace(/\s+$/, "").split(/\s+/) // trim, then split
+}
+
+Array.prototype.last = function() {
+	return this[this.length - 1]
 }
 
 function dateTimeXSD(ts) {

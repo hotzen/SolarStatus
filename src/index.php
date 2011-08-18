@@ -15,6 +15,7 @@ require 'lib/common.php';
 	<script src="js/solar.js" type="text/javascript"></script>
 	<script src="js/TableTransformer.js" type="text/javascript"></script>
 	<script src="js/parsers.js" type="text/javascript"></script>
+	<script src="js/overview.js" type="text/javascript"></script>
 </head>
 <body>
 <?php
@@ -92,11 +93,7 @@ EOC;
 </nav>
 
 <section id="overview" class="hide">
-	<ul>
-		<li>T O D O</li>
-		<li><label>CPU #1 <meter min="0" max="100" value="25" title="Non-Idleness"></meter></label></li>
-		<li><label>CPU #2 <meter min="0" max="100" value="50" title="Non-Idleness"></meter></label></li>
-	</ul>
+	<ul />
 </section>
 
 <section id="probes">
