@@ -13,6 +13,7 @@ Bundled Files:
 	Document-Root is /var/docroot, so extract the downloaded zip there.
 	see also:
       http://redmine.lighttpd.net/wiki/1/Docs:SSL
+	  http://www.madboa.com/geek/openssl/#cert-self
 
 Make the scripts readable and executable:
   chmod 0755 ./scripts/*

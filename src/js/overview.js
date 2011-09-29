@@ -5,6 +5,7 @@ function solov_probes() {
 		, "nicstat"
 		, "svcs_x"
 		, "zpool_status"
+		, "top"
 	]
 }
 
@@ -15,8 +16,8 @@ function solov_probes() {
 // CPU minf mjf xcal  intr ithr  csw icsw migr smtx  srw syscl  usr sys  wt idl
 //   0  899   0   46   311  108  115    3   26    4    0   641    1   2   0  97
 //   1  325   0    0   229   57  212    3   30    2    0   980    1   1   0  98
-function solov_process_mpstat(data) {
-	var numCores = (data.length - 2) / 2
+function solov_process_mpstat(rows) {
+	var numCores = (rows.length - 2) / 2
 	var startIdx = numCores + 2
 	
 	var res = []
@@ -24,21 +25,20 @@ function solov_process_mpstat(data) {
 	for (c=0; c<numCores; c++) {
 		var coreNum  = c + 1
 		var coreIdx  = startIdx + c
-		var coreData = data[coreIdx]
+		var coreData = rows[coreIdx]
 		
 		var cols = coreData.splitBlanks()
 		
 		var idle = parseInt( cols.last() )
 		var load = 100 - idle
 		
-		var lbl = "Core #" + coreNum
-		var $meter = $("<ol></ol>").addClass("meter")
-		$meter.append( $("<li></li>").addClass("value").addClass("neg").attr("title", load+"% load").css("width", load+"%").html("&nbsp;") )
-		$meter.append( $("<li></li>").addClass("value").addClass("pos").attr("title", idle+"% idle").css("width", idle+"%").html("&nbsp;") )
+		var lbl  = "Core #"+coreNum
+		var desc = "Load of Core #"+coreNum+": "+load+"%"
 		
-		// $span.append( $("<meter></meter").attr("title", "Idle").attr("min", 0).attr("max", idle).attr("value", idle).addClass("pos") )
-		// $span.append( $("<meter></meter").attr("title", "Load").attr("min", 0).attr("max", load).attr("value", load).addClass("neg") )
-		
+		var $meter = $("<meter></meter>").attr("min", 0).attr("max", 100).attr("value", load)
+		$meter.attr("title", desc).text(desc)
+		$meter.css("background-color", "#00A67C").css("color", "#FF5F00")
+
 		res.push([lbl, $meter])
 	}
 	return res
@@ -53,12 +53,12 @@ function solov_process_mpstat(data) {
 // rpool1/zones              31K  12.9G  /zones               off          off              none
 // tank1                   1.67T  1.89T  /tank1               off          off              none
 // tank1/temp               250K   100G  /tank1/temp          name=temp    off              none
-function solov_process_zfs(data) {
+function solov_process_zfs(rows) {
 	var res = []
 	
-	for (var i=1; i<data.length; i++) { // skip first line
-		var firstSpace = data[i].indexOf(" ")
-		var firstTab   = data[i].indexOf("\t")
+	for (var i=1; i<rows.length; i++) { // skip first line
+		var firstSpace = rows[i].indexOf(" ")
+		var firstTab   = rows[i].indexOf("\t")
 		
 		var firstPos = 0
 		if (firstSpace < 0) 
@@ -75,10 +75,10 @@ function solov_process_zfs(data) {
 			continue
 		
 		// not a pool
-		if (data[i].substring(0, firstPos).indexOf("/") > 0)
+		if (rows[i].substring(0, firstPos).indexOf("/") > 0)
 			continue
 		
-		var poolData = data[i].splitBlanks()
+		var poolData = rows[i].splitBlanks()
 		var poolName = poolData[0]
 		
 		var used  = poolData[1]
@@ -107,10 +107,10 @@ function solov_process_zfs(data) {
 	return res
 }
 
-function solov_process_svcs_x(data) {
+function solov_process_svcs_x(rows) {
 	var $span;
 	
-	if (data.length == 0) {
+	if (rows.length == 0) {
 		$span = $("<span></span>").text("Everything up and operational")
 	} else {
 		$span = $("<span></span>").text("Failures, please check!").css("background-color", "red")
@@ -119,11 +119,11 @@ function solov_process_svcs_x(data) {
 	return [ ["Services", $span] ]
 }
 
-function solov_process_zpool_status(data) {
-	var out = data.join(" ").toLowerCase()
+function solov_process_zpool_status(rows) {
+	var data = rows.join(" ").toLowerCase()
 	var $span;
 		
-	if (out.indexOf("all pools are healthy") != -1) {
+	if (data.indexOf("all pools are healthy") != -1) {
 		$span = $("<span></span>").text("All pools are healthy")
 	} else {
 		$span = $("<span></span>").text("Failures, please check!").css("background-color", "red")
@@ -132,6 +132,30 @@ function solov_process_zpool_status(data) {
 	return [ ["ZFS Pool Status", $span] ]
 }
 
+function solov_process_top(rows) {
+	var res = []	
+	
+	for (var i=7; i<rows.length; i++) { // skip first 7 lines
+		var row = rows[i]
+		var cols = row.splitBlanks()
+		
+		var ps = cols.slice(10).join(" ")
+		var cpuTime = cols[8]
+		var cpuLoad = cols[9]
+		
+		$span = $("<span></span>")
+		$span.append( $("<span class=\"overview-top-ps\"></span>").css("padding-right", "1em").css("font-family", "monospace").text(ps) )
+		$span.append( $("<span class=\"overview-top-cpu-load\"></span>").css("padding-right", "0.5em").text(cpuLoad) )
+		$span.append( $("<span>(CPU-Time: </span>"))
+		$span.append( $("<span class=\"overview-top-cpu-time\"></span>").text(cpuTime) )
+		$span.append( $("<span> mins)</span>"))
+		
+		res.push( ["Top Process", $span] )
+		break;
+	}
+	
+	return res
+}
 
 //               capacity     operations    bandwidth
 //pool        alloc   free   read  write   read  write

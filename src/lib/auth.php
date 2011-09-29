@@ -1,16 +1,5 @@
 <?php
-function isPasswordLogin(&$password) {
-	if (!isset($_REQUEST['auth']) || !isset($_REQUEST['p']))
-		return false;
-	
-	if (strlen($_REQUEST['p']) == 0)
-		return false;
-	
-	$password = $_REQUEST['p'];
-	return true;
-}
-
-function isChallengeResponseLogin(&$challenge, &$response) {
+function isLogin(&$challenge, &$response) {
 	if (!isset($_REQUEST['auth']) || !isset($_REQUEST['c']) || !isset($_REQUEST['r']))
 		return false;
 	
@@ -23,26 +12,16 @@ function isChallengeResponseLogin(&$challenge, &$response) {
 	return true;
 }
 
-function loginPWD($password, &$token) {
-
-	if ($password == $_SERVER['SOLAR_CONFIG']['AUTH']['PASSWORD']) {
-		$token = generateToken();
-		return true;
+function login($challenge, $response, &$token) {
+	$exp = generateExpectedResponse($challenge);
+	
+	if ($response != $exp) {
+		$token = '';
+		return false;
 	}
 	
-	$token = '';
-	return false;
-}
-
-function loginCR($challenge, $response, &$token) {
-	
-	if ($response == generateExpectedResponse($challenge)) {
-		$token = generateToken();	
-		return true;
-	}
-	
-	$token = '';
-	return false;
+	$token = generateToken();	
+	return true;
 }
 
 function isAuthorized(&$token = NULL) {
@@ -61,8 +40,9 @@ function isAuthorized(&$token = NULL) {
 		$auth = checkToken($token);
 		
 		// generate new token
-		if ($auth)
+		if ($auth) {
 			$token = generateToken();
+		}
 		
 		return $auth;
 	}
@@ -115,7 +95,7 @@ function checkToken($t) {
 	$time   = hexdec($ps[0]);
 	$dur    = time() - $time;
 	$expire = (int)$_SERVER['SOLAR_CONFIG']['AUTH']['EXPIRE'];
-				
+
 	if ($dur > $expire)
 		return false;
 		
@@ -132,7 +112,7 @@ function getLoginForm($failed) {
 	$self      = $_SERVER['PHP_SELF'];
 	$challenge = generateChallenge();
 	
-	$header = ($failed) ? "Authorization failed" : "Authorization required";
+	$header = ($failed) ? "Login failed" : "Please login";
 		
 	$o = <<<EOC
 	<h1>${header}</h1>

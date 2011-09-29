@@ -3,7 +3,7 @@ script_dir = ./scripts
 
 ;################################################
 ; Support for nicstat <http://www.brendangregg.com/Perf/network.html#nicstat>
-; comment out to disable
+; Comment out the nicstat-probe way below if you dont want to use nicstat
 nicstat = nicstat
 
 
@@ -12,9 +12,9 @@ nicstat = nicstat
 ; Manual:
 ;     http://smartmontools.sourceforge.net/man/smartctl.8.html
 ;     http://sourceforge.net/apps/trac/smartmontools/wiki/Powermode
-; comment out to disable
 ;
 ; smartmon requires raw disk access via /dev/rdsk/, see man-page link above!
+; could be that smartctl requires chuid to allow root-access
 smartctl   = /opt/smartmon/sbin/smartctl
 
 
@@ -26,14 +26,26 @@ password = f00bar
 ; used to generate hashs, tokens and challenges. please change it.
 secret   = 9d9c8a3fb07ccb2c7a56d2f89b2dee6f
 
-; time after a token is expired, the token is refreshed each time
-; SolarStatus is reloaded or an AJAX-request is successfully executed
+; duration in seconds a token is valid (default: 300, so 5 minutes)
 expire = 300
+
 
 ;################################################
 ; device-sets, where each set contains N devices.
-; A device-set can be used in commands by using the macro %DEVSET-<NUM> which is expanded to its devices.
-; If %DEVSET-X contains 3 devices, a command using this devset is expanded to 3 individual commands, where each command uses one of those 3 devices
+; A device-set can be used in commands by using the macro %DEVSET-<NUM> which gets expanded to the set's devices.
+;
+; A command using a device-sets with N devices, will result in execution of N commands,
+; each using one device of the device-set.
+;
+; Example: If %DEVSET-11 contains 3 devices, a command using this devset is expanded to 3 individual commands,
+; 		   where each command uses one of those 3 devices
+;		   Directive:	[devset-11]
+;						dev[] = <dev-1>
+;						dev[] = <dev-2>
+;						dev[] = <dev-3>
+;		   Command:		echo %DEVSET-11
+;		   Expanded:	echo <dev-1>, echo <dev-2>, echo <dev-3>
+;						(3 independent commands are executed in sequence)
 
 ; device-set #0: SSD/OS
 [devset-0]
@@ -52,14 +64,15 @@ dev[] = /dev/rdsk/c8t3d0
 
 ;################################################
 ; COMMANDS, where each command may use the folling variables/macros:
-; 	%DEVSET-<ID>   a set of devices, configured above
+; 	%DEVSET-<ID>   a specific device-set, configured above
 ; 	%SMARTCTL	   the path to smartctl, if configured above,
 ;	%NICSTAT	   the path to nicstat, if configured above
 ;
 ; each command-section begins with "command-", followed by the command's id
 
 [commands]
-; the sat,12 device-parameter results in dmesg: "Error for Command: <undecoded cmd 0xa1>    Error Level: Recovered"
+; the sat (TODO FIXME or really sat,12 ?) device-parameter results in dmesg:
+;	"Error for Command: <undecoded cmd 0xa1>    Error Level: Recovered"
 ; see http://sourceforge.net/mailarchive/message.php?msg_id=27470552
 ;smartctl_health = "%SMARTCTL --health -d sat,12 %DEVSET-1"
 
@@ -67,6 +80,7 @@ smartctl_health = "%SMARTCTL --health -d scsi %DEVSET-1"
 ;smartctl_health = "%SMARTCTL --health -d scsi %DEVSET-1 | tail -n +4"
 
 smartctl_temp   = "%SMARTCTL --attributes -d sat,12 %DEVSET-1 | grep -i temperature"
+;smartctl_crit	= "%SMARTCTL --attributes -d sat,12 %DEVSET-1 | egrep -i 'reallocated_sector|pending_sector|spin_retry|crc_error'"
 smartctl_attr   = "%SMARTCTL --attributes -d sat,12 %DEVSET-1"
 smartctl_info   = "%SMARTCTL --info -d sat,12 %DEVSET-1"
 smartctl_all    = "%SMARTCTL --all -d sat,12 %DEVSET-1"
@@ -75,6 +89,7 @@ smartctl_test_res   = "%SMARTCTL --log=selftest -d sat,12 %DEVSET-1"
 smartctl_test_short = "%SMARTCTL --test=short -d sat,12 %DEVSET-1"
 smartctl_test_long  = "%SMARTCTL --test=long -d sat,12 %DEVSET-1"
 
+; test-command to print each device of device-set #1
 ; echo_devset1  = "echo %DEVSET-1"
 
 
@@ -90,7 +105,7 @@ smartctl_test_long  = "%SMARTCTL --test=long -d sat,12 %DEVSET-1"
 [filter-1]
 label    = "CPU, I/O, TOP, NIC"
 selector = "#mpstat, #zpool_iostat, #top, #nicstat"
-default  = true
+; default  = true
 
 [filter-2]
 label    = "Health"
@@ -121,12 +136,13 @@ label    = "Logs"
 selector = ".probe-logs"
 
 [filter-70]
-label    = "Hardware"
+label    = "System / HW"
 selector = ".probe-hw"
 
 [filter-80]
 label    = "S.M.A.R.T."
 selector = ".probe-smart"
+
 
 ;################################################
 ; PROBES, each probe is a listing that displays either
@@ -138,6 +154,7 @@ selector = ".probe-smart"
 ;  script   EITHER name of a script in the scripts-directory
 ;  cmd      OR     id of a command configured above
 ;  order    An integer to determine the order in which the probes are displayed, optional
+;  confirm  Probe is not auto refreshed, but explicitly by user-confirmation (e.g. SMART self-tests)
 
 [probe-vmstat]
 label  = "CPU (vmstat)"
@@ -164,7 +181,7 @@ script = zpool_iostat
 order  = 21
 
 [probe-nicstat]
-label  = "Network-Interfaces (<a href="http://www.brendangregg.com/K9Toolkit/nicstat.c">nicstat</a>)"
+label  = "Network-Interfaces (<a href='http://www.brendangregg.com/K9Toolkit/nicstat.c' target='_blank'>nicstat</a>)"
 class  = probe-io
 script = nicstat
 order  = 22
@@ -205,6 +222,12 @@ class  = probe-svcs
 script = svcs
 order  = 41
 
+[probe-shares]
+label  = "Shares"
+class  = probe-svcs
+script = sharemgr
+order  = 42
+
 [probe-prstat]
 label  = "Top CPU Processes (prstat)"
 class  = probe-ps
@@ -238,21 +261,27 @@ confirm = "Display?"
 
 [probe-cpu_freq]
 label  = "CPU Current Frequency"
-class  = probe-cpu
+class  = probe-cpu probe-hw
 script = cpu_freq
 order  = 12
+
+[probe-uname]
+label  = "System Information"
+class  = probe-hw
+script = uname
+order  = 70
 
 [probe-cpu_supported_freq]
 label  = "CPU Supported Frequencies"
 class  = probe-hw
 script = cpu_supported_freq
-order  = 70
+order  = 71
 
 [probe-prtdiag]
 label  = "System Configuration & Diagnostic Information (prtdiag)"
 class  = probe-hw
 script = prtdiag
-order  = 71
+order  = 72
 
 [probe-smart_health]
 label  = "S.M.A.R.T Health"
@@ -267,7 +296,7 @@ cmd    = smartctl_temp
 order  = 82
 
 [probe-smart_attr]
-label  = "S.M.A.R.T Attributes"
+label  = "S.M.A.R.T Attributes (<a href='http://sourceforge.net/apps/trac/smartmontools/wiki/Howto_ReadSmartctlReports_ATA' target='_blank'>HowTo</a>)"
 class  = probe-smart
 cmd    = smartctl_attr
 order  = 83
@@ -285,6 +314,12 @@ class  = probe-smart
 cmd    = smartctl_info
 order  = 85
 confirm = "Display?"
+
+[probe-iostat_errors]
+label  = "IOStat Error Summary"
+class  = probe-smart
+script = iostat_errors
+order  = 86
 
 [probe-smart_test_res]
 label  = "S.M.A.R.T. Self-Test Results"

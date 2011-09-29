@@ -50,7 +50,6 @@ function unfailProbe($probe) {
 }
 
 function registerProbeViews() {
-	
 	// bind view-selector links
 	$(".probe .view-selector a").click(function() {
 		var $a = $(this)
@@ -198,7 +197,7 @@ function refreshProbe($probe) {
 			
 			if (i == 0) 
 				$rawRes.addClass("first")
-			else if (i == resArr.length-1)
+			if (i == resArr.length-1)
 				$rawRes.addClass("last")
 			
 			// generate Solar-Overview for this probe
@@ -215,14 +214,20 @@ function refreshProbe($probe) {
 		$probe.removeClass("loading")
 	}
 	
-	var onError = function(xhr, textStatus, errorThrown) {
-		failProbe($probe, textStatus + " / " + errorThrown)
+	var onError = function(xhr, errorType, error) {
+		failProbe($probe, errorType + ": " + error)
 
 		// clear
 		$probe.children("code").add(".data").add(".view").html("")
 		
 		// clear loading-state
 		$probe.removeClass("loading")
+		
+		if (error == "NO_AUTH") {
+			if (confirm("No Authentication\n\nReload and display login-form?")) {
+				window.location.reload()
+			}
+		}
 	}
 	
 	var script = $probe.attr("data-script")
@@ -288,18 +293,23 @@ function generateOverview(probe, data) {
 		
 		var res = window[fn](data)
 		
-		// add each result-item as a <li>
-		for (var i=0; i<res.length; i++) {
-			var item = res[i]
-			var $li  = $("<li></li>")
-			$li.append( $("<label></label>").text( item[0] ) )
-			$li.append( item[1] )
-		
-			$overviewList.append( $li )
+		if (res && res.length && res.length > 0) {
+			// add each result-item as a <li>
+			for (var i=0; i<res.length; i++) {
+				var item = res[i]
+				var $li  = $("<li></li>")
+				$li.append( $("<label></label>").text( item[0] ) )
+				$li.append( item[1] )
+			
+				$overviewList.append( $li )
+			}
+		} else {
+			if (console && console.warn)
+				console.warn([fn, "no result"])
 		}
 	} catch(ex) {
 		if (console && console.error)
-			console.error(["solov_generate failed on probe", id, (ex.toString) ? ex.toString() : ex])
+			console.error([fn, "failed", (ex.toString) ? ex.toString() : ex])
 	}
 }
 

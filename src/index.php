@@ -8,6 +8,7 @@ require 'lib/common.php';
 <head>
 	<title>SolarStatus v0.4</title>
 	<link href="css/style.css" rel="stylesheet" type="text/css"></link>
+	
 	<script src="js/lib.js" type="text/javascript"></script>
 	<script src="js/jquery.js" type="text/javascript"></script>
 	<script src="js/jquery.sha1.js" type="text/javascript"></script>
@@ -16,6 +17,10 @@ require 'lib/common.php';
 	<script src="js/TableTransformer.js" type="text/javascript"></script>
 	<script src="js/parsers.js" type="text/javascript"></script>
 	<script src="js/overview.js" type="text/javascript"></script>
+	
+	<!--
+	<script src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table"]}]}' type="text/javascript"></script>
+	-->
 </head>
 <body>
 <?php
@@ -28,18 +33,10 @@ try {
 
 $password = $challenge = $response = $token = NULL;
 
-if (isPasswordLogin($password)) {
-	if (!loginPWD($password, $token)) {
-		echo getLoginForm(true); echo "</body></html>";
-		exit;
-	} else {
-		reloadTokenized($token);
-	}
-}
-
-if (isChallengeResponseLogin($challenge, $response)) {
-	if (!loginCR($challenge, $response, $token)) {
-		echo getLoginForm(true); echo "</body></html>";
+if (isLogin($challenge, $response)) {
+	if (!login($challenge, $response, $token)) {
+		echo getLoginForm(true);
+		echo "</body></html>";
 		exit;
 	} else {
 		reloadTokenized($token);
@@ -47,7 +44,8 @@ if (isChallengeResponseLogin($challenge, $response)) {
 }
 
 if (!isAuthorized($token)) {
-	echo getLoginForm(false); echo "</body></html>";
+	echo getLoginForm(false);
+	echo "</body></html>";
 	exit;
 }
 
@@ -121,7 +119,7 @@ EOC;
 			$probeClazzes[] = "confirm";
 			$confirmText = trim($probeConf['CONFIRM']);
 			$confirmData = <<<EOC
-<div class="result last"><code>This probe must be explicitly refreshed to show any data</code><pre></pre></div>
+<div class="result last"><code>This probe must be explicitly refreshed</code><pre></pre></div>
 EOC;
 		} else {
 			$confirmText = "";

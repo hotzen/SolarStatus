@@ -1,5 +1,10 @@
+/* hacks */
+meter {
+	-webkit-appearance: none;
+}
+
 body {
-	background-color: #E8E8E8;
+	background-color: #F7F7F7;
 }
 
 .hide {
@@ -77,8 +82,7 @@ li, label, a, header, footer, h1, th, time {
 
 #overview {
 	background-color: #D9D9D9;
-	border: 1px solid black;
-	border-radius: 10px;
+	border: 1px solid #CCC;
 	margin: 10px;
 	margin-top: 4em;
 	padding: 5px;
@@ -92,8 +96,7 @@ li, label, a, header, footer, h1, th, time {
 
 #overview li {
 	padding: 0;
-	margin: 0;
-	margin-bottom: 0.5em;
+	margin: 1e;
 }
 
 #overview li label {
@@ -101,6 +104,11 @@ li, label, a, header, footer, h1, th, time {
 	width: 20em;
 }
 
+#overview li meter {
+	display: inline-block;
+	width: 10em;
+	height: 1em;
+}
 
 #probes {
 	margin-top: 4em;
@@ -111,6 +119,7 @@ li, label, a, header, footer, h1, th, time {
 	border: 1px solid #CCC;
 	margin: 10px;
 	padding: 5px;
+	border-radius: 5px;
 }
 
 .probe header {
@@ -243,27 +252,4 @@ li, label, a, header, footer, h1, th, time {
 	padding: 2px 10px;
 	border: 1px solid #CCC;
 	font-family: "Lucida Console", monospace;
-}
-
-.meter {
-	display: inline-block;
-	margin: 5px;
-	padding: 0;
-	border: 1px solid black;
-	width: 200px;
-	height: 15px;
-}
-
-.meter .value {
-	display: inline-block;
-	margin: 0;
-	padding: 0;
-	height: 100%;
-}
-
-.meter .value.pos {
-	background-color: #00A67C;
-}
-.meter .value.neg {
-	background-color: #FF5F00;
 }
