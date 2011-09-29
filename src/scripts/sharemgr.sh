@@ -1,0 +1,1 @@
+sharemgr show -p
