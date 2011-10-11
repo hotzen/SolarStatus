@@ -7,10 +7,11 @@ The Interface is based on minimalistic HTML5 with jQuery (Java-Script)
 Tested on Solaris 11 Express, targeted for Open Indiana as well
 	
 Installation:
-	see intall directory
+	see install directory
 	
 Configuration:
 	see conf.ini.php
+	see scripts-directory
 
 Screenshot: https://github.com/hotzen/SolarStatus/tree/master/screenshots
 Download:   https://github.com/hotzen/SolarStatus/tree/master/dist
@@ -22,8 +23,7 @@ Kai <kai_at_meder_d0t_info>
 
 I put SolarStatus under the MIT License, see the attached LICENSE file.
 
-
 Roadmap:
-- parse the output of all(?) bundled scripts and transform to machine-readable data
-- extract metrics from parsed data to generate overview-page, showing CPU, Mem, I/O, etc.
-- enhance metrics with jquery-sparklines or other graphing solution
+- uname-script does not output anything, hint appreciated
+- enhance overview-page
+- include graphs into overview-page (jquery-sparklines)
