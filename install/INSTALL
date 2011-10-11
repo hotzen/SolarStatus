@@ -1,21 +1,85 @@
-Installing lighttpd & PHP5:
+# =======================================================================================    
+Install Lighttpd and PHP5.x
   sudo pkg install lighttpd
   sudo pkg install php-52 (or any newer version if available)
 
-Bundled Files:
-  - smf-svc-lighttpd.xml
-    service-descriptor for solaris SMF, see also:
-      http://redmine.lighttpd.net/wiki/1/LighttpdOnSolaris
-      http://blogs.oracle.com/mandy/entry/lighttpd_smf_troubles
-	 	
-  - lighttpd.conf
-    Configuration for lighttpd, enables SSL on Port 443 and Fast-CGI for PHP5.
-	Document-Root is /var/docroot, so extract the downloaded zip there.
-	see also:
-      http://redmine.lighttpd.net/wiki/1/Docs:SSL
-	  http://www.madboa.com/geek/openssl/#cert-self
+# =======================================================================================    
+See /path/to/SolarStatus/install/lighttpd.conf for a preconfigured lighttpd.conf
+The file belongs into /etc/lighttpd/ or /etc/lighttpd/<version>/ depending on your system.
+Be sure to backup any existing file first!
 
-Make the scripts readable and executable:
-  chmod 0755 ./scripts/*
+The bundled lighttpd.conf enables SSL on Port 443 and Fast-CGI for PHP5.
+
+Please check the following directives inside the file:
+  server.document-root   <- unpack SolarStatus into that directory
+  server.errorlog
+  var.php_bin-path
+    
+The bundled lighttpd.conf enables SSL/TLS,
+to disable use the following directives:
+  server.port = 80
+  ssl.engine  = "disable"
+    
+To generate a self-signed certificate:
+  openssl req -new -x509 -keyout server.pem -out server.pem -days 100 -nodes
+    
+It is important to set the common-name to the host or IP-address
+ which you use to address your server.
+Example:
+  https://192.168.11.42/  "192.168.11.42" is your CN
+  https://box/            "box" is your CN
   
+Use the following to export your generated certiciate to an pfx file,
+ which can be imported by windows et.al.
+You have to import it into the "Trusted Root Certification Authorities" store,
+ then all major browsers should accept the SSL-connection.
+  openssl pkcs12 -export -out knecht.pfx -in server.pem -name "MyBox"
+
+See also:
+  http://redmine.lighttpd.net/wiki/1/Docs:SSL
+  http://www.madboa.com/geek/openssl/#cert-self
+  
+# =======================================================================================  
+See /path/to/SolarStatus/install/smf-svc-lighttpd.xml for a preconfigured service-descriptor for SMF
+ ( http://en.wikipedia.org/wiki/Service_Management_Facility )
+
+See for installation instructions and necessary init.d-script
+  http://redmine.lighttpd.net/wiki/1/LighttpdOnSolaris
+
+The bundled SMF-descriptor already uses the following descriptor:
+  http://blogs.oracle.com/mandy/entry/lighttpd_smf_troubles
+
+# =======================================================================================    
+See here for another in-depth installation guide of SolarStatus:
+  http://hardforum.com/showthread.php?t=1641432#postcount1037850740
+
+# =======================================================================================    
+Make the scripts readable and executable:
+  chmod 0755 /path/to/SolarStatus/scripts/*
+
 Configure conf.ini.php to suit your needs.
+ 
+# =======================================================================================  
+For SMART-commands you need to setuid smartctl with
+  chown u+s smartctl
+Please see for security risks: http://en.wikipedia.org/wiki/Setuid
+Short explanation: Every user of the system (read: logged on user, not via smb/nfs or such)
+ can run the setuid'ed smartctl with root-privileges and can secure erase your disks.
+ DO AT YOUR OWN RISK! However, recommended :)
+
+# =======================================================================================
+/path/to/SolarStatus/extra contains the alerter.py python-script which is meant to be executed as a cronjob.
+It's job is to check your services (SMF), check the ZFS Pool State and your S.M.A.R.T. state and mail you in case of failure.
+It needs to be configured, so please edit it.
+
+To activate the alerter, register it as root in the root's crontab:
+  su
+  export EDITOR=nano
+  crontab -e
+insert (exemplary, edit as you like):
+  # 3am, every day, check status
+  0 3 * * * python /path/to/SolarStatus/extra/alerter.py
+
+
+Have fun, feedback appreciated
+Kai (kai@meder.info)

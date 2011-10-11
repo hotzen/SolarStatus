@@ -74,7 +74,7 @@ function registerProbeViews() {
   
 function registerProbeRefresh() {
 	// bind auto-refresher to checkbox
-	$("#probe-refresh-active").click( autoRefresher )
+	$("#probe-refresh-toggle").click( autoRefresher )
 	
 	// enable and bind refresh button
 	$(".probe .refresh").click(function() {
@@ -87,7 +87,7 @@ function registerProbeRefresh() {
 }
 
 function autoRefresher() {
-	var active = $("#probe-refresh-active").get(0).checked
+	var active = $("#probe-refresh-toggle").get(0).checked
 	if (!active) {
 		return
 	}
@@ -247,7 +247,6 @@ function refreshProbe($probe) {
 		url:        url
 		, type:	    "GET"
 		, dataType: "json"
-		
 		, success:	onSuccess
 		, error: 	onError
 	})
@@ -312,66 +311,3 @@ function generateOverview(probe, data) {
 			console.error([fn, "failed", (ex.toString) ? ex.toString() : ex])
 	}
 }
-
-
-/*
-function runProbeParsers() {
-	$(".probe").each(function() {
-		runProbeParser( $(this) )
-	})
-}
-
-function runProbeParser($probe) {
-	var id = $probe.attr("id")
-	
-	var $time = $probe.find("footer > time")
-	var $raw  = $probe.children("code")
-	var $data = $probe.children(".data")
-	
-	var parserFun = window["solar_parsers"][id]
-	
-	// use parser
-	if (parserFun) {
-		
-		// enable view-selector
-		$probe.find(".view-selector .view-data").removeClass("hide")
-		
-		if ($probe.hasClass("parsing")) {
-			if (console && console.warn)
-				console.warn(["already parsing, skipping parser-run", id])
-			return
-		}
-		
-		// set parsing-state
-		$probe.addClass("parsing").removeClass("parsed")
-		
-		try {
-			// parse ...
-			parserFun($raw.html(), $data)
-			
-			// fire event
-			$probe.trigger('data', [id, $data])
-			
-			// if nothing is selected, show parsed data as default
-			if ($probe.find(".view-selector li.selected").length == 0) {
-				$probe.find(".view-selector li.view-data a").click()
-			}
-			
-		} catch (e) {
-			if (console && console.error)
-				console.error(["parser failed", id, e])
-			failProbe($probe, "parser failed")
-		}
-		
-		// set parsed-state
-		$probe.removeClass("parsing").addClass("parsed")
-			
-	// no parser registered
-	} else {
-		// if nothing is selected, select raw data
-		if ($probe.find(".view-selector li.selected").length == 0) {
-			$probe.find(".view-selector li.view-raw a").click()
-		}
-	}
-}
-*/

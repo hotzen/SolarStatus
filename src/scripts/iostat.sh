@@ -1,2 +1,2 @@
-# iostat -DCnx 1 2
-iostat -Dnx 1 2
+# iostat -dcnx 1 2
+iostat -dnx 1 2

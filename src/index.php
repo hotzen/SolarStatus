@@ -6,7 +6,7 @@ require 'lib/common.php';
 ?>
 <html>
 <head>
-	<title>SolarStatus v0.4</title>
+	<title>SolarStatus v0.5</title>
 	<link href="css/style.css" rel="stylesheet" type="text/css"></link>
 	
 	<script src="js/lib.js" type="text/javascript"></script>
@@ -61,7 +61,7 @@ window.SOLAR = {
 
 <nav id="main-panel">
 	<ul id="probe-filters">
-		<li class="overview"><a href="#overview" title="Show overview" data-filter="#overview">Overview</a></li>
+		<li class="overview"><a href="#overview" title="Display overview" data-filter="#overview">Overview</a></li>
 		<?php
 		try {
 			$filters = $_SERVER['SOLAR_CONFIG']['FILTERS'];
@@ -72,7 +72,7 @@ window.SOLAR = {
 				$clazzSel = (isset($filter['DEFAULT']) && $filter['DEFAULT']) ? 'selected' : '';
 
 				echo <<<EOC
-		<li class="${clazzSel}"><a href="#filter" title="Filter ${label}" data-filter="${selector}">${label}</a></li>
+		<li class="${clazzSel}"><a href="#filter" title="Display ${label} probes" data-filter="${selector}">${label}</a></li>
 
 EOC;
 			}
@@ -82,12 +82,11 @@ EOC;
 		}
 		?>
 		<li><a href="#filter" title="Show all probes" data-filter=".probe">All</a></li>
+		<li id="probe-refresh">
+			<label><input id="probe-refresh-toggle" type="checkbox" name="probe_refresh_toggle" value="1" /> Auto refresh</label>
+			<label> every <input id="probe-refresh-freq" type="number" name="probe_refresh_freq" min="1" value="3" /> seconds</label>
+		</li>
 	</ul>
-	
-	<div id="probe-refresh">
-		<label><input id="probe-refresh-active" type="checkbox" name="probe_refresh_active" value="1" /> Auto refresh</label>
-		<label> every <input id="probe-refresh-freq" type="number" name="probe_refresh_freq" min="1" value="3" /> seconds</label>
-	</div>
 </nav>
 
 <section id="overview" class="hide">

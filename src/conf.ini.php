@@ -265,11 +265,11 @@ class  = probe-cpu probe-hw
 script = cpu_freq
 order  = 12
 
-[probe-uname]
-label  = "System Information"
-class  = probe-hw
-script = uname
-order  = 70
+;[probe-uname] script does not output anything :/ any hint?
+;label  = "System Information"
+;class  = probe-hw
+;script = uname
+;order  = 70
 
 [probe-cpu_supported_freq]
 label  = "CPU Supported Frequencies"
