@@ -21,15 +21,19 @@ function parseIniFile($file) {
 		, 'FILTERS'  => array()
 		, 'PROBES'   => array()
 	);
-	
+		
 	$probesAutoOrder = 1000;
 	
 	foreach ($iniUC as $section => $sectionConf) {
 		
 		// devsets
-		if (preg_match("/DEVSET-([0-9]+)/i", $section, $matches)) {
-			$devSetID = (int)$matches[1];
-
+		if (preg_match("/DEVSET-(.+)/i", $section, $matches)) {
+			$match = $matches[1];
+			if (!ctype_digit($match))
+				throw new Exception("Invalid Non-Numeric ${section}");
+				
+			$devSetID = (int)$match;
+			
 			if (!isset($sectionConf['DEV']))
 				throw new Exception("DevSet '${section}' without DEV[] directive");
 			
@@ -37,8 +41,12 @@ function parseIniFile($file) {
 		}
 				
 		// filters
-		else if (preg_match("/FILTER-([0-9]+)/i", $section, $matches)) {
-			$filterID = (int)$matches[1];
+		else if (preg_match("/FILTER-(.+)/i", $section, $matches)) {
+			$match = $matches[1];
+			if (!ctype_digit($match))
+				throw new Exception("Invalid Non-Numeric ${section}");
+			
+			$filterID = (int)$match;
 
 			if (!isset($sectionConf['LABEL']))
 				throw new Exception("Filter '${section}' without LABEL directive");
@@ -50,8 +58,12 @@ function parseIniFile($file) {
 		}
 		
 		// probes
-		else if (preg_match("/PROBE-([a-z0-9_]+)/i", $section, $matches)) {
-			$probeID = strtolower($matches[1]);
+		else if (preg_match("/PROBE-(.+)/i", $section, $matches)) {
+			$match = $matches[1];
+			if (preg_match("/[^a-z0-9_]/i", $match))
+				throw new Exception("Invalid Special-Chars ${section}");
+			
+			$probeID = strtolower($match);
 
 			if (!isset($sectionConf['SCRIPT']) && !isset($sectionConf['CMD']))
 				throw new Exception("Probe '${section}' without neither SCRIPT nor CMD directive");
@@ -88,7 +100,7 @@ function parseIniFile($file) {
 	// sort
 	ksort($conf['FILTERS']);
 	uasort($conf['PROBES'], 'probeComparator');
-	
+		
 	return $conf;
 }
 

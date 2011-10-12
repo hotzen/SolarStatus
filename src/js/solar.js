@@ -111,8 +111,7 @@ function refreshProbe($probe) {
 	var id = $probe.attr("id")
 	
 	if ($probe.hasClass("loading")) {
-		if (console && console.warn)
-			console.warn(["already loading, skipping refresh", $probe.attr("id")])
+		console.warn(["already loading, skipping refresh", $probe.attr("id")])
 		return
 	}
 		
@@ -258,11 +257,10 @@ function requestOverview() {
 	console.log( $overviewList.length )
 	
 	var cssID = function(name) { return "#" + name }
-	var probes = solov_probes().map(cssID).join(", ")
+	var probes = SOLAR.OVERVIEW.map(cssID).join(", ")
 		
 	if (probes.length == 0) {
-		if (console && console.warn)
-			console.warn("solov_probes() did not specify any probes, aborting overview")
+		console.warn("solov_probes() did not specify any probes, aborting overview")
 		return
 	}
 	
@@ -283,10 +281,9 @@ function generateOverview(probe, data) {
 	var $overviewList = $( "#overview ul" )
 	
 	try {
-		var fn = "solov_process_" + probe
+		var fn = "solov_" + probe
 		if (typeof(window[fn]) === 'undefined') {
-			if (console && console.log)
-				console.log(["no solov_process_<probe> defined for probe", probe])
+			console.log(["no solov_<probe> function found", probe, fn])
 			return
 		}
 		
@@ -303,11 +300,9 @@ function generateOverview(probe, data) {
 				$overviewList.append( $li )
 			}
 		} else {
-			if (console && console.warn)
-				console.warn([fn, "no result"])
+			console.warn([fn, "no result"])
 		}
 	} catch(ex) {
-		if (console && console.error)
-			console.error([fn, "failed", (ex.toString) ? ex.toString() : ex])
+		console.error([fn, "failed", (ex.toString) ? ex.toString() : ex])
 	}
 }

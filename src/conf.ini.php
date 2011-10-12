@@ -123,6 +123,10 @@ selector = ".probe-io"
 label    = "ZFS"
 selector = ".probe-zfs"
 
+[filter-31]
+label    = "ZFS Adv."
+selector = ".probe-zfs-adv"
+
 [filter-40]
 label    = "Processes"
 selector = ".probe-ps"
@@ -188,7 +192,7 @@ order  = 22
 
 [probe-zpool_status]
 label  = "ZFS Status"
-class  = probe-zfs
+class  = "probe-zfs"
 script = zpool_status
 order  = 31
 
@@ -209,6 +213,25 @@ label  = "ZFS Snapshots"
 class  = probe-zfs
 script = zfs_snaps
 order  = 34
+
+[probe-zfs_arc_stat]
+label  = "ZFS ARC Stat"
+class  = probe-zfs-adv
+script = zfs_arc_stat
+order  = 35
+
+[probe-zfs_arc_summary]
+label  = "ZFS ARC Summary"
+class  = probe-zfs-adv
+script = zfs_arc_summary
+order  = 36
+
+; DTrace requires additional privileges
+;[probe-zfs_zil_stat]
+;label  = "ZFS ZIL Stat"
+;class  = probe-zfs-adv
+;script = zfs_zil_stat
+;order  = 37
 
 [probe-svcs_x]
 label  = "Service-Problems"
@@ -288,32 +311,35 @@ label  = "S.M.A.R.T Health"
 class  = probe-smart
 cmd    = smartctl_health
 order  = 81
+confirm = "SMART commands will wake-up your disks!"
 
 [probe-smart_temp]
 label  = "S.M.A.R.T Temperature"
 class  = probe-smart
 cmd    = smartctl_temp
 order  = 82
+confirm = "SMART commands will wake-up your disks!"
 
 [probe-smart_attr]
 label  = "S.M.A.R.T Attributes (<a href='http://sourceforge.net/apps/trac/smartmontools/wiki/Howto_ReadSmartctlReports_ATA' target='_blank'>HowTo</a>)"
 class  = probe-smart
 cmd    = smartctl_attr
 order  = 83
+confirm = "SMART commands will wake-up your disks!"
 
 [probe-smart_all]
 label  = "S.M.A.R.T Information"
 class  = probe-smart
 cmd    = smartctl_all
 order  = 84
-confirm = "Display?"
+confirm = "SMART commands will wake-up your disks!"
 
 [probe-smart_devinfo]
 label  = "Device Information"
 class  = probe-smart
 cmd    = smartctl_info
 order  = 85
-confirm = "Display?"
+confirm = "SMART commands will wake-up your disks!"
 
 [probe-iostat_errors]
 label  = "IOStat Error Summary"
@@ -326,18 +352,18 @@ label  = "S.M.A.R.T. Self-Test Results"
 class  = probe-smart
 cmd    = smartctl_test_res
 order  = 91
-confirm = "Display?"
+confirm = "SMART commands will wake-up your disks!"
 
 [probe-smart_test_short]
 label  = "S.M.A.R.T. Short Self-Test"
 class  = probe-smart
 cmd    = smartctl_test_short
 order  = 92
-confirm = "Perform a short Self-Test?"
+confirm = "SMART commands will wake-up your disks!\nPerform a short Self-Test?"
 
 [probe-smart_test_long]
 label  = "S.M.A.R.T. Long Self-Test"
 class  = probe-smart
 cmd    = smartctl_test_long
 order  = 93
-confirm = "Perform a LONG Self-Test?"
+confirm = "SMART commands will wake-up your disks!\nPerform a LONG Self-Test?"

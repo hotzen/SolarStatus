@@ -12,8 +12,8 @@ function execRaw($cmd, &$rc = NULL) {
 	// $rc = 0;
 	// $lines = explode("\n", trim($out));
 		
-	// if ($rc != 0)
-	//     throw new Exception("command '${cmd}' failed with code ${rc}");
+	if ($rc != 0)
+		throw new Exception("RC ${rc}");
 	
 	return $lines;
 }
@@ -98,8 +98,6 @@ function expandDevSets( $cmdIn ) {
 	$cmdsWork = array( $cmdIn );
 	$cmdsDone = array();
 	
-	if (!isset($_SERVER['SOLAR_CONFIG']['DEVSETS']))
-		throw new Exception("no Dev-Sets configured");
 	$devsets = $_SERVER['SOLAR_CONFIG']['DEVSETS'];
 	
 	while (($cmd = array_shift($cmdsWork)) !== NULL) {
@@ -161,4 +159,42 @@ function displayException(Exception $e) {
 	echo "<h1>The Exception ${clazz} was raised</h1>";
 	echo "<h3>${msg}</h3>";
 	echo "<pre>${trace}</pre>";
+}
+
+function file_ext($name) {
+  return substr(strrchr($name, '.'), 1);
+}
+
+function file_wo_ext($name) {
+	return substr($name, 0, strrpos($name, '.'));
+}
+
+
+function getOverviewScripts() {
+	$scripts = array();
+		
+	$d = opendir('./overview/');
+	while ($e = readdir($d)) {
+		if (file_ext($e) != 'js')
+			continue;
+		
+		$id   = file_wo_ext($e);
+		$path = 'overview/' . $e;
+		
+		$scripts[$id] = $path;
+	}
+	closedir($d);
+	
+	return $scripts;
+}
+
+function JS_array(array $arr, $sep, $pre = "", $suff = "") {
+	$o = '';
+	$i = 0;
+	foreach ($arr as $v) {
+		if ($i > 0) $o .= $sep;
+		$o .= $pre . $v . $suff;
+		++$i;
+	}
+	return $o;
 }

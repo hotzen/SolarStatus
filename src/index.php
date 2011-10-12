@@ -16,7 +16,17 @@ require 'lib/common.php';
 	<script src="js/solar.js" type="text/javascript"></script>
 	<script src="js/TableTransformer.js" type="text/javascript"></script>
 	<script src="js/parsers.js" type="text/javascript"></script>
+	
+	<!--
 	<script src="js/overview.js" type="text/javascript"></script>
+	-->
+	<?php
+	$overviewProbes = array();
+	foreach (getOverviewScripts() as $id => $path) {
+		$overviewProbes[] = $id;
+		echo "<script src=\"${path}\" type=\"text/javascript\"></script>\n";
+	}
+	?>
 	
 	<!--
 	<script src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table"]}]}' type="text/javascript"></script>
@@ -52,8 +62,9 @@ if (!isAuthorized($token)) {
 ?>
 <script type="text/javascript">
 window.SOLAR = {
-	  SELF:  "<?php echo $_SERVER['PHP_SELF']; ?>"
-	, TOKEN: "<?php echo $token; ?>"
+	  SELF:     "<?php echo $_SERVER['PHP_SELF']; ?>"
+	, TOKEN:    "<?php echo $token; ?>"
+	, OVERVIEW: [ <?php echo JS_array($overviewProbes, ", ", "'", "'"); ?> ]
 }
 </script>
 <?php unset($password, $challenge, $response, $token); ?>
@@ -117,8 +128,10 @@ EOC;
 		if (isset($probeConf['CONFIRM'])) {
 			$probeClazzes[] = "confirm";
 			$confirmText = trim($probeConf['CONFIRM']);
+			$confirmText = expandVars($confirmText, array('\n' => "\n"));
+			
 			$confirmData = <<<EOC
-<div class="result last"><code>This probe must be explicitly refreshed</code><pre></pre></div>
+<div class="result last"><code>${confirmText}</code><pre></pre></div>
 EOC;
 		} else {
 			$confirmText = "";
