@@ -6,7 +6,7 @@ require 'lib/common.php';
 ?>
 <html>
 <head>
-	<title>SolarStatus v0.5</title>
+	<title>SolarStatus v0.5.1</title>
 	<link href="css/style.css" rel="stylesheet" type="text/css"></link>
 	
 	<script src="js/lib.js" type="text/javascript"></script>
