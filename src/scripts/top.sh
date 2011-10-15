@@ -1,1 +1,0 @@
-top --batch --full-commands --quick --displays 1 10

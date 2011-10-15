@@ -2,11 +2,11 @@
 <?php
 require 'lib/conf.php';
 require 'lib/auth.php';
-require 'lib/common.php';
+require 'lib/solar.php';
 ?>
 <html>
 <head>
-	<title>SolarStatus v0.5.1</title>
+	<title>SolarStatus v0.6</title>
 	<link href="css/style.css" rel="stylesheet" type="text/css"></link>
 	
 	<script src="js/lib.js" type="text/javascript"></script>
@@ -15,13 +15,13 @@ require 'lib/common.php';
 	<script src="js/auth.js" type="text/javascript"></script>
 	<script src="js/solar.js" type="text/javascript"></script>
 	<script src="js/TableTransformer.js" type="text/javascript"></script>
-	<script src="js/parsers.js" type="text/javascript"></script>
-	
-	<!--
-	<script src="js/overview.js" type="text/javascript"></script>
-	-->
 	<?php
-	$overviewProbes = array();
+	$transformProbes = $overviewProbes = array();
+
+	foreach (getTransformScripts() as $id => $path) {
+		$transformProbes[] = $id;
+		echo "<script src=\"${path}\" type=\"text/javascript\"></script>\n";
+	}
 	foreach (getOverviewScripts() as $id => $path) {
 		$overviewProbes[] = $id;
 		echo "<script src=\"${path}\" type=\"text/javascript\"></script>\n";
@@ -29,6 +29,7 @@ require 'lib/common.php';
 	?>
 	
 	<!--
+	TODO Google or jQuery Sparklines?
 	<script src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table"]}]}' type="text/javascript"></script>
 	-->
 </head>
@@ -62,17 +63,18 @@ if (!isAuthorized($token)) {
 ?>
 <script type="text/javascript">
 window.SOLAR = {
-	  SELF:     "<?php echo $_SERVER['PHP_SELF']; ?>"
-	, TOKEN:    "<?php echo $token; ?>"
-	, OVERVIEW: [ <?php echo JS_array($overviewProbes, ", ", "'", "'"); ?> ]
+	  SELF:         "<?php echo $_SERVER['PHP_SELF']; ?>"
+	, AUTH_TOKEN:   "<?php echo $token; ?>"
+	, AUTH_EXPIRED: false
+	, OVERVIEW:     <?php echo json_encode($overviewProbes); ?> 
 }
 </script>
 <?php unset($password, $challenge, $response, $token); ?>
 
 
-<nav id="main-panel">
+<nav id="panel">
 	<ul id="probe-filters">
-		<li class="overview"><a href="#overview" title="Display overview" data-filter="#overview">Overview</a></li>
+		<li class="overview"><a href="#overview" title="Display Overview" data-filter="#overview">Overview</a></li>
 		<?php
 		try {
 			$filters = $_SERVER['SOLAR_CONFIG']['FILTERS'];
@@ -83,7 +85,7 @@ window.SOLAR = {
 				$clazzSel = (isset($filter['DEFAULT']) && $filter['DEFAULT']) ? 'selected' : '';
 
 				echo <<<EOC
-		<li class="${clazzSel}"><a href="#filter" title="Display ${label} probes" data-filter="${selector}">${label}</a></li>
+		<li class="${clazzSel}"><a href="#filter" title="Display ${label}" data-filter="${selector}">${label}</a></li>
 
 EOC;
 			}
@@ -92,8 +94,7 @@ EOC;
 			exit;
 		}
 		?>
-		<li><a href="#filter" title="Show all probes" data-filter=".probe">All</a></li>
-		<li id="probe-refresh">
+		<li id="probe-auto-refresh">
 			<label><input id="probe-refresh-toggle" type="checkbox" name="probe_refresh_toggle" value="1" /> Auto refresh</label>
 			<label> every <input id="probe-refresh-freq" type="number" name="probe_refresh_freq" min="1" value="3" /> seconds</label>
 		</li>
@@ -131,7 +132,7 @@ EOC;
 			$confirmText = expandVars($confirmText, array('\n' => "\n"));
 			
 			$confirmData = <<<EOC
-<div class="result last"><code>${confirmText}</code><pre></pre></div>
+<div class="result last"><code>explicitly refresh to execute</code><pre>${confirmText}</pre></div>
 EOC;
 		} else {
 			$confirmText = "";
@@ -139,29 +140,21 @@ EOC;
 		}
 		
 		$probeClazz = implode(' ', $probeClazzes);
-		
-		// SCRIPT / CMD
-		$script = $cmdID = NULL;
-		if (isset($probeConf['SCRIPT'])) {
-			$script = $probeConf['SCRIPT'];
-		} else {
-			$cmdID = $probeConf['CMD'];
-		}
-		
+				
 		// OUTPUT
 		echo <<<EOC
-	<div id="${probeID}" class="probe ${probeClazz} hide" data-script="${script}" data-cmd="${cmdID}" data-confirm="${confirmText}">
+	<div id="${probeID}" class="probe ${probeClazz} hide" data-confirm="${confirmText}">
 		<header>
 			<h1>${label}</h1>
-			<ul class="view-selector">
-				<li class="view-raw"><a href="#raw" title="View raw data" data-filter=".raw">Raw</a></li>
-				<li class="view-data hide"><a href="#data" title="View parsed data" data-filter=".data">Parsed</a></li>
+			<ul class="view-selector hide">
+				<li class="view-raw"><a href="#data" title="View raw data" data-filter=".raw">Raw</a></li>
+				<li class="view-transformed"><a href="#transform" title="View transformed data" data-filter=".transformed">Transformed</a></li>
 			</ul>
-			<a href="#refresh" class="refresh" title="refresh data"></a>
+			<a href="#refresh" class="refresh" title="Refresh"></a>
 			<div class="failure hide"></div>
 		</header>
 		<div class="raw">${confirmData}</div>
-		<div class="data hide"></div>
+		<div class="transformed hide"></div>
 		<footer>
 			<time datetime="" data-timestamp=""></time>
 		</footer>

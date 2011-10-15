@@ -54,11 +54,14 @@ See here for another in-depth installation guide of SolarStatus:
   http://hardforum.com/showthread.php?t=1641432#postcount1037850740
 
 # =======================================================================================    
+Configure conf.ini.php to suit your needs.
+
+In current versions, there are no scripts shipped anymore. Instead everything is in conf.ini.php.
+But feel free to continue using scripts, this feature is not deprecated.
+
 Make the scripts readable and executable:
   chmod 0755 /path/to/SolarStatus/scripts/*
-
-Configure conf.ini.php to suit your needs.
- 
+  
 # =======================================================================================  
 For SMART-commands you need to setuid smartctl with
   chown u+s smartctl

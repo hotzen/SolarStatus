@@ -22,7 +22,7 @@ function getScriptPath($script) {
 	if (!preg_match('#^[a-z0-9_]+$#', $script))
 		throw new Exception("invalid script '${script}'");
 
-	$path = $_SERVER['SOLAR_CONFIG']['SCRIPT_DIR'] . '/' . $script . '.sh';
+	$path = $_SERVER['SOLAR_CONFIG']['DIR_SCRIPTS'] . '/' . $script . '.sh';
 	
 	if (!file_exists($path))
 		throw new Exception("script '${path}' does not exist");
@@ -53,42 +53,40 @@ function getScriptCmd($script, $lineSep = "\n") {
 	return implode($lineSep, $lines);
 }
 
-function getCommand($cmdID) {
+// function getCommand($cmdID) {
 
-	if (!isset($_SERVER['SOLAR_CONFIG']['COMMANDS']))
-		throw new Exception("no commands configured");
+	// if (!isset($_SERVER['SOLAR_CONFIG']['COMMANDS']))
+		// throw new Exception("no commands configured");
 		
-	if (!isset($_SERVER['SOLAR_CONFIG']['COMMANDS'][$cmdID]))
-		throw new Exception("command '${cmdID}' is not configured");
+	// if (!isset($_SERVER['SOLAR_CONFIG']['COMMANDS'][$cmdID]))
+		// throw new Exception("command '${cmdID}' is not configured");
 	
-	return $_SERVER['SOLAR_CONFIG']['COMMANDS'][$cmdID];
-}
+	// return $_SERVER['SOLAR_CONFIG']['COMMANDS'][$cmdID];
+// }
 
 
 // expands all variables used in a command and returns an array of
 // expanded, raw commands that can be directly passed to execRaw
 function expandCommand($cmd) {
-	$vars = array();
-	
-	if (isset($_SERVER['SOLAR_CONFIG']['SMARTCTL'])) {
-		$vars['%SMARTCTL'] = $_SERVER['SOLAR_CONFIG']['SMARTCTL'];
+	if (isset($_SERVER['SOLAR_CONFIG']['MACROS'])) {
+		$macros = $_SERVER['SOLAR_CONFIG']['MACROS'];
+	} else {
+		$macros = array();
 	}
 	
-	if (isset($_SERVER['SOLAR_CONFIG']['NICSTAT'])) {
-		$vars['%NICSTAT'] = $_SERVER['SOLAR_CONFIG']['NICSTAT'];
-	}
-	
-	// expand variables
-	$cmdVarExp = expandVars($cmd, $vars);
+	// expand macros
+	$cmdVarExp = expandVars($cmd, $macros);
 
 	// expand dev-sets
 	$cmdsDevSetExp = expandDevSets( $cmdVarExp );
 	
 	// check for invalid variables
+	/*
 	foreach ($cmdsDevSetExp as $cmdDevSetExp) {
 		if (preg_match('/(%.+)/', $cmdDevSetExp, $matches))
 			throw new Exception("invalid variable '${matches[1]}' used in command '${cmd}'");
 	}
+	*/
 	
 	// done
 	return $cmdsDevSetExp;
@@ -127,15 +125,6 @@ function expandDevSetID($cmd, $devSetID, $val) {
 	return expandVars($cmd, array($var => $val));
 }
 
-function jsonError($msg) {
-	$err = array(
-		"error"   => true,
-		"message" => $msg
-	);
-	echo json_encode( $err );
-	exit;
-}
-
 function expandVars($str, array $vars1, array $vars2 = array(), array $vars3 = array()) {
 	$vars = array_merge($vars1, $vars2, $vars3);
 	return str_replace(array_keys($vars), array_values($vars), $str);
@@ -152,6 +141,54 @@ function splitTrim($str, $sep, $isRegex = false) {
 	return $split;
 }
 
+function file_ext($name) {
+  return substr(strrchr($name, '.'), 1);
+}
+
+function file_wo_ext($name) {
+	return substr($name, 0, strrpos($name, '.'));
+}
+
+function dir_listing($path) {
+	$fs = array();
+	$d = opendir($path);
+	while ($f = readdir($d)) {
+		$fs[] = $f;
+	}
+	closedir($d);
+	return $fs;
+}
+
+function getTransformScripts() {
+	$scripts = array();
+	$files   = dir_listing('./transform');
+	
+	foreach ($files as $file) {
+		if (file_ext($file) != 'js')
+			continue;
+		
+		$id   = file_wo_ext($file);
+		$path = 'transform/' . $file;
+		$scripts[$id] = $path;
+	}
+	return $scripts;
+}
+
+function getOverviewScripts() {
+	$scripts = array();
+	$files   = dir_listing('./overview');
+	
+	foreach ($files as $file) {
+		if (file_ext($file) != 'js')
+			continue;
+		
+		$id   = file_wo_ext($file);
+		$path = 'overview/' . $file;
+		$scripts[$id] = $path;
+	}
+	return $scripts;
+}
+
 function displayException(Exception $e) {
 	$clazz = get_class($e);
 	$msg   = $e->getMessage();
@@ -161,40 +198,11 @@ function displayException(Exception $e) {
 	echo "<pre>${trace}</pre>";
 }
 
-function file_ext($name) {
-  return substr(strrchr($name, '.'), 1);
-}
-
-function file_wo_ext($name) {
-	return substr($name, 0, strrpos($name, '.'));
-}
-
-
-function getOverviewScripts() {
-	$scripts = array();
-		
-	$d = opendir('./overview/');
-	while ($e = readdir($d)) {
-		if (file_ext($e) != 'js')
-			continue;
-		
-		$id   = file_wo_ext($e);
-		$path = 'overview/' . $e;
-		
-		$scripts[$id] = $path;
-	}
-	closedir($d);
-	
-	return $scripts;
-}
-
-function JS_array(array $arr, $sep, $pre = "", $suff = "") {
-	$o = '';
-	$i = 0;
-	foreach ($arr as $v) {
-		if ($i > 0) $o .= $sep;
-		$o .= $pre . $v . $suff;
-		++$i;
-	}
-	return $o;
+function jsonError($msg) {
+	$err = array(
+		"error"   => true,
+		"message" => $msg
+	);
+	echo json_encode( $err );
+	exit;
 }

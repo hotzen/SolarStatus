@@ -1,1 +1,0 @@
-zfs list -t snapshot

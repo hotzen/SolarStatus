@@ -1,1 +1,0 @@
-prtdiag -v

@@ -1,1 +1,0 @@
-zpool status -v

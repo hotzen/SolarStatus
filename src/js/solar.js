@@ -1,9 +1,19 @@
 $(document).ready(function() {
+	repositionContent()
+	$( window ).resize( repositionContent );
+
 	registerProbeRefresh()
 	registerProbeViews()
 	registerProbeFilters()
 })
- 
+
+function repositionContent() {
+	var $panel   = $("#panel")
+	var $content = $("#overview, #probes")
+	
+	panelHeight = $panel.outerHeight(true) // true = including margin
+	$content.css({ marginTop: panelHeight + 'px' });
+}
 
 function registerProbeFilters() {
 	$("#probe-filters a").click(function() {
@@ -30,10 +40,9 @@ function registerProbeFilters() {
 		// stop event-bubbling of link-click
 		return false
 	})
-	
-	// apply selected filter or auto-select overview
+		
+	// apply pre-selected filter or auto-select overview
 	$selFilters = $("#probe-filters .selected")
-
 	if ($selFilters.length > 0) {
 		$selFilters.find("a").click()
 	} else {
@@ -108,10 +117,10 @@ function autoRefresher() {
 
 function refreshProbe($probe) {
 	
-	var id = $probe.attr("id")
+	var probeID = $probe.attr("id")
 	
 	if ($probe.hasClass("loading")) {
-		console.warn(["already loading, skipping refresh", $probe.attr("id")])
+		console.warn(["already loading, skipping refresh", probeID])
 		return
 	}
 		
@@ -134,76 +143,70 @@ function refreshProbe($probe) {
 	$probe.addClass("loading")
 
 	unfailProbe($probe)
-	
-	var parserCallback = function() {
-		// enable data-selector
-		$probe.find(".view-selector .view-data").removeClass("hide")
-		
-		// if nothing is selected, select parsed data
-		if ($probe.find(".view-selector li.selected").length == 0) {
-			$probe.find(".view-selector li.view-data a").click()
-		}
-	}
-		
+			
 	var onSuccess = function(data, textStatus, xhr) {
 		// check if error is returned
 		if (data.error) {
-			return onError(xhr, "apperror", data.message)
+			return onError(xhr, "SolarStatus", data.message)
 		}
 		
 		// store time in <time>
 		var ts = data["time"]
 		var d  = new Date(ts)
 		var dateTime    = dateTimeXSD(ts)
-		var dateTimeLbl = dateTimeHuman(ts)
+		var dateTimeOut = dateTimeHuman(ts)
 		
-		$probe.find("footer > time").attr("data-timestamp", ts).attr("datetime", dateTime).html( dateTimeLbl )			
+		$probe.find("footer > time").attr("data-timestamp", ts).attr("datetime", dateTime).html( dateTimeOut )			
 		
-		// prepare container-element for reactors to the probe-event
-		var $container    = $probe.children(".data").html( "" )
-		var containerElem = $container.get(0)
+		// prepare container-element for transformation
+		var $transformElem = $probe.children(".transformed").html( "" )
 		
-		// reset raw-output and process
-		var $raw = $probe.children(".raw").html("")
-		var resArr  = data["result"]
-		
+		// reset data
+		var $dataElem = $probe.children(".raw").html("")
+				
 		// update token
-		if (data["token"] && data["token"] != SOLAR.TOKEN) {
-			SOLAR.TOKEN = data["token"]
+		if (data["token"] && data["token"] != SOLAR.AUTH_TOKEN) {
+			SOLAR.AUTH_TOKEN = data["token"]
 			
 			// update url-bar
 			if (window.history.replaceState) {
-				var newTokenPath = SOLAR.SELF + "?t=" + SOLAR.TOKEN
-				window.history.replaceState(SOLAR.TOKEN, "Token Refreshed", newTokenPath);
+				var newTokenPath = SOLAR.SELF + "?t=" + SOLAR.AUTH_TOKEN
+				window.history.replaceState(SOLAR.AUTH_TOKEN, "Token Refreshed", newTokenPath);
 			}
 		}
 		
+		// process results
+		var resArr = data["result"]
 		for (var i=0; i<resArr.length; ++i) {
 			var res = resArr[i]
+
+			// replace NL in multiline commands with carriage-return-style arrow			
+			var cmd    = res[0]
+			var cmdOut = cmd.replace(/\n/g, "&nbsp;&crarr; ")
 			
-			var resCmd    = res[0].replace(/\n/g, "&nbsp;&crarr; ") // replace NL in multiline commands with carriage-return-style arrow
-			var resOutArr = res[1]
-			var resOut    = resOutArr.join("\n").replaceEntities()
+			// join output-lines into string, replace entities
+			var linesArr = res[1]
+			var lines    = linesArr.join("\n").replaceEntities()
 			
-			var $rawRes = $( document.createElement("div") ).appendTo( $raw ).addClass("result")
-			$( document.createElement("code") ).appendTo( $rawRes ).html( resCmd )
-			$( document.createElement("pre")  ).appendTo( $rawRes ).html( resOut )
+			var $resultElem = $( document.createElement("div") ).appendTo( $dataElem ).addClass("result")
+			$( document.createElement("code") ).appendTo( $resultElem ).html( cmdOut )
+			$( document.createElement("pre")  ).appendTo( $resultElem ).html( lines )
 			
 			if (i % 2 == 0)
-				$rawRes.addClass("even")
+				$resultElem.addClass("even")
 			else
-				$rawRes.addClass("odd")
+				$resultElem.addClass("odd")
 			
 			if (i == 0) 
-				$rawRes.addClass("first")
+				$resultElem.addClass("first")
 			if (i == resArr.length-1)
-				$rawRes.addClass("last")
+				$resultElem.addClass("last")
 			
-			// generate Solar-Overview for this probe
-			generateOverview(id, resOutArr)
-						
-			// trigger probe-event
-			$probe.trigger('probe', [id, resCmd, resOutArr, containerElem, parserCallback])
+			// transform
+			transformProbeData($probe, probeID, linesArr, cmd, $transformElem)
+			
+			// generate overview
+			generateOverview(probeID, linesArr)
 		}
 								
 		// apply view
@@ -216,34 +219,26 @@ function refreshProbe($probe) {
 	var onError = function(xhr, errorType, error) {
 		failProbe($probe, errorType + ": " + error)
 
-		// clear
-		$probe.children("code").add(".data").add(".view").html("")
+		// clear output
+		$probe.children("code").add(".transformed").html("")
 		
 		// clear loading-state
 		$probe.removeClass("loading")
 		
 		if (error == "NO_AUTH") {
-			if (confirm("No Authentication\n\nReload and display login-form?")) {
+			// first notice that auth is expired, ask to login again
+			if (!SOLAR.AUTH_EXPIRED && confirm("Authentication is expired.\n\nDo you want to login again?")) {
 				window.location.reload()
 			}
+			
+			// register expiration
+			SOLAR.AUTH_EXPIRED = true
 		}
 	}
 	
-	var script = $probe.attr("data-script")
-	var cmd    = $probe.attr("data-cmd")
-	var time   = (new Date()).getTime()
-	
-	var url = "./exec.php?t=" + SOLAR.TOKEN + "&ts=" + time
-	
-	if (script.length > 0)
-		url += "&s=" + script
-	else if (cmd.length > 0)
-		url += "&c=" + cmd
-	else
-		throw "probe " + id + " does neither define a script nor a command"
-	
+	var time = (new Date()).getTime()
 	$.ajax({
-		url:        url
+		url:        "exec.php?t=" + SOLAR.AUTH_TOKEN + "&p=" + probeID + "&ts=" + time
 		, type:	    "GET"
 		, dataType: "json"
 		, success:	onSuccess
@@ -251,16 +246,46 @@ function refreshProbe($probe) {
 	})
 }
 
+function transformProbeData($probe, probe, lines, cmd, $container) {
+	try {
+		var fn = "solar_transform_" + probe
+		if (typeof(window[fn]) === 'undefined') {
+			//console.trace(["no solar_transform_<probe> function found", probe, fn])
+			return
+		}
+		
+		// activate view-selector
+		$probe.find(".view-selector").removeClass("hide")
+		
+		// process transformation
+		console.log([$container.length, $container])
+		
+		var container = $container.get(0)
+		var ret = window[fn](container, lines, cmd)
+		
+		// use optional return value as view-label
+		if (ret && ret.toString) {
+			$probe.find(".view-transformed a").text( ret.toString() )
+		}
+		
+		// activate the transformed-view
+		$probe.find(".view-transformed a").click()
+		
+	} catch(ex) {
+		var msg = (ex.toString) ? ex.toString() : ex
+		console.error(["transformation failed", probe, msg])
+	}
+}
+
 function requestOverview() {
 	var $overview = $( "#overview" )
 	var $overviewList = $overview.find("ul")
-	console.log( $overviewList.length )
-	
+		
 	var cssID = function(name) { return "#" + name }
 	var probes = SOLAR.OVERVIEW.map(cssID).join(", ")
 		
 	if (probes.length == 0) {
-		console.warn("solov_probes() did not specify any probes, aborting overview")
+		console.debug(["no overview-probes registered"])
 		return
 	}
 	
@@ -281,28 +306,35 @@ function generateOverview(probe, data) {
 	var $overviewList = $( "#overview ul" )
 	
 	try {
-		var fn = "solov_" + probe
+		var fn = "solar_overview_" + probe
 		if (typeof(window[fn]) === 'undefined') {
-			console.log(["no solov_<probe> function found", probe, fn])
+			//console.trace(["no solar_overview_<probe> function found", probe, fn])
 			return
 		}
-		
+				
+		// process overview-function
 		var res = window[fn](data)
 		
 		if (res && res.length && res.length > 0) {
+			
 			// add each result-item as a <li>
 			for (var i=0; i<res.length; i++) {
-				var item = res[i]
-				var $li  = $("<li></li>")
-				$li.append( $("<label></label>").text( item[0] ) )
-				$li.append( item[1] )
+				var item  = res[i]
+				
+				var label = item[0]
+				var view  = item[1]
+				
+				var $li = $("<li></li>")
+				$li.append( $("<label></label>").text( label ) )
+				$li.append( view )
 			
 				$overviewList.append( $li )
 			}
 		} else {
-			console.warn([fn, "no result"])
+			console.warn(["overview-function produced no result", fn])
 		}
 	} catch(ex) {
-		console.error([fn, "failed", (ex.toString) ? ex.toString() : ex])
+		var msg = (ex.toString) ? ex.toString() : ex
+		console.error(["overview-function failed", fn, msg])
 	}
 }

@@ -1,8 +1,8 @@
 
 function TableTransformer() {
-	this.noiseDefs = []
-	this.colDefs   = []
-	this.footer    = {}
+	this._ignores = []
+	this._columns = []
+	this._footer  = {}
 
 	// trim & lowercase
 	this.patterize = function(s) {
@@ -11,38 +11,38 @@ function TableTransformer() {
 		return s.replace(/^\s+/, '').replace(/\s+$/, '').toLowerCase()
 	}
 		
-	this.defineNoise = function(pattern) {
+	this.ignore = function(pattern) {
 		var def = {
 			pattern: this.patterize( pattern )
 		}
-		this.noiseDefs.push(def)
+		this._ignores.push(def)
 		return def
 	}
 
-	this.defineCol = function(pattern, info) {
+	this.col = function(pattern, info) {
 		var def = {
 			pattern: this.patterize( pattern ),
 			//label:	 label,
 			info:    info
 		}
-		this.colDefs.push(def)
+		this._columns.push(def)
 		return def
 	}
 	
-	this.defineFooter = function(prefix) {
-		this.footer = {
-			prefix:		this.patterize(prefix)
+	this.footer = function(prefix) {
+		this._footer = {
+			prefix:	this.patterize(prefix)
 		}
 	}
 	
-	this.defineSuperCol = function(pattern, info, subPatterns) {
-		
+	this.superCol = function(pattern, info, subPatterns) {
+		// TODO
 	}
 
-	this.isNoise = function(data) {
+	this.isIgnore = function(data) {
 		var dataLC = data.toLowerCase()
-		for (var i=0; i<this.noiseDefs.length; ++i) {
-			if (dataLC.indexOf(this.noiseDefs[i].pattern) != -1)
+		for (var i=0; i<this._ignores.length; ++i) {
+			if (dataLC.indexOf(this._ignores[i].pattern) != -1)
 				return true
 		}
 		return false
@@ -53,8 +53,8 @@ function TableTransformer() {
 		var maxPatternLength = -1
 		var bestColDef = false
 		
-		for (var k=0; k<this.colDefs.length; ++k) {
-			var colDef = this.colDefs[k]
+		for (var k=0; k<this._columns.length; ++k) {
+			var colDef = this._columns[k]
 			
 			if (dataLC.indexOf(colDef.pattern) != -1 && colDef.pattern.length > maxPatternLength) {
 				maxPatternLength = colDef.pattern.length
@@ -81,7 +81,7 @@ function TableTransformer() {
 			var dataRow = dataRows[i]
 			
 			// console.log(["parsing row", i])
-			if (this.isNoise(dataRow)) {
+			if (this.isIgnore(dataRow)) {
 				continue
 			}
 			
@@ -123,21 +123,15 @@ function TableTransformer() {
 			
 			// found header- as well as data-columns: implicitly transform data-columns to headers
 			if (cntHeaders > 0 && cntData > 0 && ratio > 0.7) {
-				if (console && console.warn)
-					console.warn(["transforming undefined columns to header-columns in row", i, ratio])
-								
 				cols = cols.map(function(col) {
 					// do not transform headers
 					if (col.isHeader)
 						return col
-					
-					if (console && console.warn)
-						console.warn(["transforming column to header-column", col.data])
-					
+					//console.log(["transforming column to header-column", col.data])
 					return {
 						isHeader: true,
 						data:     col.data,
-						def:      that.defineCol(col.data, "")
+						def:      that.col(col.data, "")
 					}
 				})
 			}

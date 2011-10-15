@@ -2,17 +2,17 @@
 function loadConfig() {
 	$file = './conf.ini.php';
 	$conf = parseIniFile( $file );
-	
+		
 	$_SERVER['SOLAR_CONFIG'] = $conf;
 }
 
 function parseIniFile($file) {
 	if (!is_readable($file))
-		throw new Exception("Config-File not readable");
+		throw new Exception("conf.ini.php not readable");
 
 	$ini = parse_ini_file($file, true);
 	if (!$ini)
-		throw new Exception("Could not load configuration-file");
+		throw new Exception("could not parse conf.ini.php");
 	
 	$iniUC = uppercaseConfKeys($ini);
 	$conf = array(
@@ -84,12 +84,12 @@ function parseIniFile($file) {
 		}
 		
 		// commands
-		else if ($section == 'COMMANDS') {
-			foreach ($sectionConf as $cmdID => $cmd) {
-				$cmdID_LC = strtolower($cmdID);
-				$conf['COMMANDS'][$cmdID_LC] = $cmd;
-			}
-		}
+		// else if ($section == 'COMMANDS') {
+			// foreach ($sectionConf as $cmdID => $cmd) {
+				// $cmdID_LC = strtolower($cmdID);
+				// $conf['COMMANDS'][$cmdID_LC] = $cmd;
+			// }
+		// }
 		
 		// anything else
 		else {

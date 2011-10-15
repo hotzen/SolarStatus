@@ -1,4 +1,4 @@
-function solov_top(rows) {
+function solar_overview_top(rows) {
 	var res = []	
 	
 	for (var i=7; i<rows.length; i++) { // skip first 7 lines

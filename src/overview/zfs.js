@@ -6,7 +6,7 @@
 // rpool1/zones              31K  12.9G  /zones               off          off              none
 // tank1                   1.67T  1.89T  /tank1               off          off              none
 // tank1/temp               250K   100G  /tank1/temp          name=temp    off              none
-function solov_zfs(rows) {
+function solar_overview_zfs(rows) {
 	var res = []
 	
 	for (var i=1; i<rows.length; i++) { // skip first line
@@ -45,7 +45,7 @@ function solov_zfs(rows) {
 		
 		if (usedUnit != availUnit) {
 			if (console && console.warn)
-				console.warn(["solov_zfs: different units in used vs. avail, aborting", used, avail])
+				console.warn(["solar_overview_zfs: different units in used vs. avail, aborting", used, avail])
 			continue;
 		}
 		

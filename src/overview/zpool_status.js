@@ -1,4 +1,4 @@
-function solov_zpool_status(rows) {
+function solar_overview_zpool_status(rows) {
 	var data = rows.join(" ").toLowerCase()
 	var $span;
 		

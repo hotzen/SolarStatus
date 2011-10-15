@@ -8,8 +8,9 @@
 if(typeof(console) === 'undefined') {
     var console = {}
     var logger  = function() {};
-	console.log = console.error = console.info = console.debug = console.warn = logger
-	console.trace = console.dir = console.dirxml = console.group = console.groupEnd = console.time = console.timeEnd = console.assert = console.profile = logger
+	console.log   = console.error   = console.info   = console.debug   = console.warn     = logger
+	console.trace = console.dir     = console.dirxml = console.group   = console.groupEnd = logger
+	console.time  = console.timeEnd = console.assert = console.profile                    = logger
 }
 
 String.prototype.replaceEntities = function() {
@@ -27,21 +28,22 @@ Array.prototype.last = function() {
 function dateTimeXSD(ts) {
 	var DATE_SEP = "-";
 	var TIME_SEP = ":";
-	
 	var comps = dateTimeStringComps(ts);
-
 	return comps.year  + DATE_SEP + comps.month + DATE_SEP + comps.days + "T" +
 	       comps.hours + TIME_SEP + comps.mins  + TIME_SEP + comps.secs + "Z" // TODO proper TimeZone
 }
 
 function dateTimeHuman(ts) {
-	var DATE_SEP = ".";
-	var TIME_SEP = ":";
+	//var DATE_SEP = ".";
+	//var TIME_SEP = ":";
 	
-	var comps = dateTimeStringComps(ts);
+	// var comps = dateTimeStringComps(ts);
 
-	return comps.year  + DATE_SEP + comps.month + DATE_SEP + comps.days + " " +
-	       comps.hours + TIME_SEP + comps.mins  + TIME_SEP + comps.secs
+	// return comps.year  + DATE_SEP + comps.month + DATE_SEP + comps.days + " " +
+	       // comps.hours + TIME_SEP + comps.mins  + TIME_SEP + comps.secs
+	
+	var d = new Date(ts)
+	return d.toLocaleDateString() + " @ " + d.toLocaleTimeString()
 }
 
 function dateTimeComps(ts) {

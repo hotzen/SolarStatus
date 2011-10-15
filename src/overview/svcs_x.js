@@ -1,4 +1,4 @@
-function solov_svcs_x(rows) {
+function solar_overview_svcs_x(rows) {
 	var $span;
 	
 	if (rows.length == 0) {

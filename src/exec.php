@@ -1,68 +1,71 @@
 <?php
 require 'lib/conf.php';
 require 'lib/auth.php';
-require 'lib/common.php';
+require 'lib/solar.php';
 
-header("Content-Type: text/javascript");
+header('Content-Type: text/javascript');
 
 try {
 	loadConfig();
 } catch (Exception $e) {
-	jsonError("NO_CONFIG");
+	jsonError( 'NO_CONFIG' );
 }
 
 if (!isAuthorized()) {
-	jsonError("NO_AUTH");
+	jsonError( 'NO_AUTH' );
 }
 
-// SCRIPT
-if (isset($_GET["s"]) ) {
-	try {
-		$script = $_GET["s"];
+if (!isset($_GET['p'])) {
+	jsonError( 'NO_PROBE' );
+}
+
+$probeID = strtolower($_GET['p']);
+
+if (!isset($_SERVER['SOLAR_CONFIG']['PROBES'][$probeID])) {
+	jsonError( "INVALID_PROBE:${probeID}" );
+}
+
+$probeConf = $_SERVER['SOLAR_CONFIG']['PROBES'][$probeID];
+
+try {
+	$newToken = generateToken();
+	$execTime = time() * 1000;
+	
+	$res = array(
+		'token'  => $newToken,
+		'time'	 => $execTime,
+		'result' => array()
+	);
+	
+	// SCRIPT
+	if (isset($probeConf['SCRIPT'])) {
+		$script = $probeConf['SCRIPT'];
+		$cmd    = getScriptCmd($script);
+		$output = execScript($script);
 		
-		$output    = execScript($script);
-		$scriptCmd = getScriptCmd($script);
-				
-		$res = array(
-			"token"  => generateToken(),
-			"script" => $script,
-			"time"	 => (time() * 1000),
-			"result" => array()
-		);
-		$res['result'][] = array($scriptCmd, $output);
+		$res['result'][] = array($cmd, $output);
 		
 		echo json_encode( $res );
-	} catch (Exception $e) {
-		jsonError( $e->getMessage() );
 	}
-}
-
-// COMMAND
-else if (isset($_GET["c"]) ) {
-	try {
-		$cmdID = $_GET["c"];
-		
-		$res = array(
-			"token"  => generateToken(),
-			"cmd"    => $cmdID,
-			"time"	 => (time() * 1000),
-			"result" => array()
-		);
 	
-		$cmdIn = getCommand($cmdID);
-		$cmds  = expandCommand($cmdIn);
+	// COMMAND
+	elseif (isset($probeConf['CMD'])) {
+		$cmds = expandCommand( $probeConf['CMD'] );
 		
 		foreach ($cmds as $cmd) {
-			$res['result'][] = array($cmd, execRaw($cmd));
+			$output = execRaw($cmd);
+			$res['result'][] = array($cmd, $output);
 		}
 		
 		echo json_encode( $res );
-		
-	} catch (Exception $e) {
-		jsonError( $e->getMessage() );
 	}
-}
-
-else {
-	jsonError( "NO_INPUT" );
+	
+	// ERROR
+	else {
+		jsonError( "PROBE_INVALD_CONF:${probeID}" );
+	}
+		
+} catch (Exception $e) {
+	$msg = $e->getMessage();
+	jsonError( "PROBE_EXEC_FAIL:${probeID}:${msg}" );
 }
