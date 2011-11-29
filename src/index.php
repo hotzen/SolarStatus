@@ -6,32 +6,46 @@ require 'lib/solar.php';
 ?>
 <html>
 <head>
-	<title>SolarStatus v0.6</title>
+	<title>SolarStatus v0.7</title>
 	<link href="css/style.css" rel="stylesheet" type="text/css"></link>
 	
+	<!-- CORE -->
 	<script src="js/lib.js" type="text/javascript"></script>
 	<script src="js/jquery.js" type="text/javascript"></script>
 	<script src="js/jquery.sha1.js" type="text/javascript"></script>
 	<script src="js/auth.js" type="text/javascript"></script>
 	<script src="js/solar.js" type="text/javascript"></script>
 	<script src="js/TableTransformer.js" type="text/javascript"></script>
+	
+	<!-- DYNAMIC TRANSFORMATIONS -->
 	<?php
-	$transformProbes = $overviewProbes = array();
-
 	foreach (getTransformScripts() as $id => $path) {
-		$transformProbes[] = $id;
-		echo "<script src=\"${path}\" type=\"text/javascript\"></script>\n";
-	}
-	foreach (getOverviewScripts() as $id => $path) {
-		$overviewProbes[] = $id;
-		echo "<script src=\"${path}\" type=\"text/javascript\"></script>\n";
+		echo <<<EOC
+		<script src="${path}" type="text/javascript"></script>
+
+EOC;
 	}
 	?>
 	
-	<!--
-	TODO Google or jQuery Sparklines?
-	<script src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table"]}]}' type="text/javascript"></script>
-	-->
+	<!-- DYNAMIC OVERVIEWS -->
+	<?php
+	$overviewProbes = array();
+
+	foreach (getOverviewStyles() as $id => $path) {
+		echo <<<EOC
+		<link href="${path}" rel="stylesheet" type="text/css"></link>
+
+EOC;
+	}
+	
+	foreach (getOverviewScripts() as $id => $path) {
+		$overviewProbes[] = $id;
+		echo <<<EOC
+		<script src="${path}" type="text/javascript"></script>
+
+EOC;
+	}
+	?>
 </head>
 <body>
 <?php
@@ -66,15 +80,13 @@ window.SOLAR = {
 	  SELF:         "<?php echo $_SERVER['PHP_SELF']; ?>"
 	, AUTH_TOKEN:   "<?php echo $token; ?>"
 	, AUTH_EXPIRED: false
-	, OVERVIEW:     <?php echo json_encode($overviewProbes); ?> 
 }
 </script>
 <?php unset($password, $challenge, $response, $token); ?>
 
-
 <nav id="panel">
 	<ul id="probe-filters">
-		<li class="overview"><a href="#overview" title="Display Overview" data-filter="#overview">Overview</a></li>
+		<li class="overview"><a href="#overview" title="Display Overview" data-filter=".overview">Overview</a></li>
 		<?php
 		try {
 			$filters = $_SERVER['SOLAR_CONFIG']['FILTERS'];
@@ -102,13 +114,21 @@ EOC;
 </nav>
 
 <section id="overview" class="hide">
-	<ul />
+	<table>
+	<?php
+	foreach ($overviewProbes as $probeID) {
+		// <thead id="overview-header-${probeID}"></thead>
+		echo <<<EOC
+		<tbody id="overview-${probeID}"></tbody>
+EOC;
+	}
+	?>
+	</table>
 </section>
 
 <section id="probes">
 	<?php
 	$probes  = $_SERVER['SOLAR_CONFIG']['PROBES'];
-	$clazzes = array();
 
 	foreach ($probes as $probeID => $probeConf) {
 		// LABEL
@@ -121,9 +141,13 @@ EOC;
 		// CLASS
 		if (isset($probeConf['CLASS'])) {
 			$probeClazzes = splitTrim($probeConf['CLASS'], ' ');
-			$clazzes      = array_unique(array_merge($clazzes, $probeClazzes));
 		} else {
 			$probeClazzes = array();
+		}
+		
+		// tag overview-probes
+		if (in_array($probeID, $overviewProbes)) {
+			$probeClazzes[] = "overview";
 		}
 		
 		if (isset($probeConf['CONFIRM'])) {
@@ -132,7 +156,7 @@ EOC;
 			$confirmText = expandVars($confirmText, array('\n' => "\n"));
 			
 			$confirmData = <<<EOC
-<div class="result last"><code>explicitly refresh to execute</code><pre>${confirmText}</pre></div>
+<div class="result odd first last"><code>explicitly refresh to execute</code><pre>${confirmText}</pre></div>
 EOC;
 		} else {
 			$confirmText = "";

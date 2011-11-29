@@ -63,7 +63,7 @@ label    = "Logs"
 selector = ".probe-logs"
 
 [filter-80]
-label    = "System / HW"
+label    = "System / Hardware"
 selector = ".probe-sys"
 
 [filter-90]
@@ -145,13 +145,13 @@ dev[] = /dev/rdsk/c8t3d0
 [probe-vmstat]
 label  = "CPU (vmstat)"
 class  = probe-cpu
-cmd    = "vmstat 1 2"
+cmd    = "/usr/bin/vmstat 1 2"
 order  = 10
 
 [probe-mpstat]
 label  = "CPU-Cores (mpstat)"
 class  = probe-cpu
-cmd    = "mpstat 1 2"
+cmd    = "/usr/bin/mpstat 1 2"
 order  = 11
 
 
@@ -162,21 +162,21 @@ order  = 11
 label  = "I/O"
 class  = probe-io
 ;cmd    = "iostat -dcnx 1 2"
-cmd    = "iostat -dnx 1 2"
+cmd    = /usr/bin/"iostat -dnx 1 2"
 order  = 20
 
 [probe-zpool_iostat]
 label  = "ZFS I/O"
 class  = "probe-zfs probe-io"
 ;cmd    = "zpool iostat -v 1 2"
-cmd    = "zpool iostat 1 2"
+cmd    = "/usr/sbin/zpool iostat 1 2"
 order  = 21
 
 ; http://www.brendangregg.com/Perf/network.html#nicstat
 [probe-nicstat]
 label  = "Network-Interfaces (<a href='http://www.brendangregg.com/K9Toolkit/nicstat.c' target='_blank'>nicstat</a>)"
 class  = probe-io
-cmd    = "nicstat 1 2"
+cmd    = "/usr/sbin/nicstat 1 2"
 order  = 22
 
 
@@ -186,25 +186,25 @@ order  = 22
 [probe-zpool_status]
 label  = "ZFS Status"
 class  = probe-zfs
-cmd    = "zpool status -x"
+cmd    = "/usr/sbin/zpool status -x"
 order  = 31
 
 [probe-zpool]
 label  = "ZFS Pools"
 class  = probe-zfs
-cmd    = "zpool status -v"
+cmd    = "/usr/sbin/zpool status -v"
 order  = 32
 
 [probe-zfs]
 label  = "ZFS Filesystems"
 class  = probe-zfs
-cmd    = "zfs list -t fs -o name,used,avail,mountpoint,sharesmb,sharenfs,keystatus"
+cmd    = "/usr/sbin/zfs list -t fs -o name,used,avail,mountpoint,sharesmb,sharenfs,keystatus"
 order  = 33
 
 [probe-zfs_snaps]
 label  = "ZFS Snapshots"
 class  = probe-zfs
-cmd    = "zfs list -t snapshot"
+cmd    = "/usr/sbin/zfs list -t snapshot"
 order  = 34
 
 ; https://github.com/mharsch/arcstat
@@ -216,6 +216,7 @@ cmd    = "/opt/arcstat.pl -f read,hits,miss,hit%,l2read,l2hits,l2miss,l2hit%,arc
 order  = 35
 
 ; http://cuddletech.com/arc_summary/
+; Thanks to ChrisBenn http://hardforum.com/showpost.php?p=1037874906&postcount=23
 [probe-zfs_arc_summary]
 label  = "ZFS ARC Summary"
 class  = probe-zfs-adv
@@ -223,12 +224,15 @@ cmd    = "/opt/arc_summary.pl"
 order  = 36
 
 ; http://www.richardelling.com/Home/scripts-and-programs-1/zilstat
-; DTrace requires additional privileges
-;[probe-zfs_zil_stat]
-;label  = "ZFS ZIL Stat"
-;class  = probe-zfs-adv
-;cmd    = "ksh /opt/zilstat.ksh -M -t 1 3"
-;order  = 37
+; DTrace requires additional privileges, so use:
+; usermod -K defaultpriv=basic,dtrace_user,dtrace_proc,dtrace_kernel webservd
+; to give webservd full read-only kernel-access
+; Thanks to ChrisBenn http://hardforum.com/showpost.php?p=1037874906&postcount=23
+[probe-zfs_zil_stat]
+label  = "ZFS ZIL Stat"
+class  = probe-zfs-adv
+cmd    = "/usr/bin/ksh /opt/zilstat.ksh -M -t 1 3"
+order  = 37
 
 
 ;*****************************
@@ -237,14 +241,14 @@ order  = 36
 [probe-svcs_x]
 label  = "Service-Problems"
 class  = probe-svcs
-cmd    = "svcs -x"
+cmd    = "/usr/bin/svcs -x"
 order  = 40
 
 [probe-svcs]
 label  = "Services"
 class  = probe-svcs
 ;cmd    = "svcs -a -o state,stime,fmri"
-cmd    = "svcs"
+cmd    = "/usr/bin/svcs"
 order  = 41
 
 
@@ -254,25 +258,25 @@ order  = 41
 [probe-links]
 label  = "Links"
 class  = probe-network
-cmd    = "dladm show-link"
+cmd    = "/usr/sbin/dladm show-link"
 order  = 42
 
 [probe-interfaces]
 label  = "Interfaces"
 class  = probe-network
-cmd    = "ipadm show-if"
+cmd    = "/usr/sbin/ipadm show-if"
 order  = 43
 
 [probe-hosts]
 label  = "Hosts"
 class  = probe-network
-cmd    = "cat /etc/hosts | egrep -v '^#'"
+cmd    = "/usr/gnu/bin/cat /etc/hosts | egrep -v '^#'"
 order  = 44
 
 [probe-shares]
 label  = "Shares"
 class  = probe-network
-cmd    = "sharemgr show -p"
+cmd    = "/usr/sbin/sharemgr show -p"
 order  = 45
 
 
@@ -282,19 +286,19 @@ order  = 45
 [probe-prstat]
 label  = "Top CPU Processes (prstat)"
 class  = probe-ps
-cmd    = "prstat -a -n 10 -s cpu 1 1"
+cmd    = "/usr/bin/prstat -a -n 10 -s cpu 1 1"
 order  = 50
 
 [probe-top]
 label  = "Top CPU Processes (CPU-Load now)"
 class  = probe-ps
-cmd    = "top --batch --full-commands --quick --displays 1 10"
+cmd    = "/usr/bin/top --batch --full-commands --quick --displays 1 10"
 order  = 51
 
 [probe-top_time]
 label  = "Top CPU Processes (Most CPU-Time)"
 class  = probe-ps
-cmd    = "top --batch --full-commands --quick --displays 1 10 --sort-order time"
+cmd    = "/usr/bin/top --batch --full-commands --quick --displays 1 10 --sort-order time"
 order  = 51
 
 [probe-ps]
@@ -302,7 +306,7 @@ label  = "Processes"
 class  = probe-ps
 ;cmd    = "ps axuw"
 ;cmd    = "ps -e -o pid -o user -o s -o pcpu -o vsz  -o stime -o args"
-cmd    = "ps -e -o pid -o user -o s -o pcpu -o pmem -o vsz  -o stime -o comm"
+cmd    = "/usr/bin/ps -e -o pid -o user -o s -o pcpu -o pmem -o vsz  -o stime -o comm"
 order  = 53
 
 
@@ -312,43 +316,55 @@ order  = 53
 [probe-dmesg]
 label  = "Kernel Ring Buffer (dmesg)"
 class  = probe-logs
-cmd    = "dmesg"
+cmd    = "/usr/sbin/dmesg"
 order  = 60
 
 [probe-adm_msgs]
 label  = "Messages (/var/adm/messages)"
 class  = probe-logs
-cmd    = "cat /var/adm/messages"
+cmd    = "/usr/gnu/bin/cat /var/adm/messages"
 order  = 61
 confirm = "Display?"
 
 
 ;*****************************
-;* Hardware
+;* System / Hardware
 
-[probe-uname] script does not output anything :/ any hint?
+[probe-uname]
 label  = "System Information"
 class  = probe-sys
 cmd    = "/usr/gnu/bin/uname --all"
 order  = 70
 
+[probe-psrinfo]
+label  = "Processor"
+class  = probe-sys
+cmd    = "/usr/sbin/psrinfo -p -v"
+order  = 71
+
 [probe-cpu_freq]
 label  = "CPU Current Frequency"
 class  = probe-cpu probe-sys
-cmd    = "kstat -p -m cpu_info -i 0 -s current_clock_Hz"
-order  = 12
+cmd    = "/usr/bin/kstat -p -m cpu_info -i 0 -s current_clock_Hz"
+order  = 72
 
 [probe-cpu_supported_freq]
 label  = "CPU Supported Frequencies"
 class  = probe-sys
-cmd    = "kstat -p -m cpu_info -s supported_frequencies_Hz"
-order  = 71
+cmd    = "/usr/bin/kstat -p -m cpu_info -s supported_frequencies_Hz"
+order  = 73
 
 [probe-prtdiag]
 label  = "System Configuration & Diagnostic Information (prtdiag)"
 class  = probe-sys
-cmd    = "prtdiag -v"
-order  = 72
+cmd    = "/usr/sbin/prtdiag -v"
+order  = 74
+
+[probe-intrstat]
+label  = "Interrupt Statistics"
+class  = probe-sys
+cmd    = "/usr/sbin/intrstat 1 2"
+order  = 75
 
 
 ;*****************************

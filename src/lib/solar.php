@@ -1,19 +1,74 @@
 <?php
+class SolarExecException extends Exception {
+	var $cmd;
+	
+	public function __construct($message, $cmd) {
+	  parent::__construct($message);
+	  $this->cmd = $cmd;
+	}
+}
+
 function execScript($script, &$rc = NULL) {
 	return execRaw(getScriptPath($script), $rc);
 }
 
-// UNCHECKED & UNSAFE
-function execRaw($cmd, &$rc = NULL) {
-	$rc = NULL;
+// RAW, UNCHECKED, UNSAFE
+function execRaw($cmd) {
+	$lines = array();	
 	
-	exec($cmd, $lines, $rc);
-	// $out = shell_exec($cmd);
-	// $rc = 0;
-	// $lines = explode("\n", trim($out));
+	$h = popen("${cmd} 2>&1", 'r');
+	
+	if ($h === false)
+		throw new SolarExecException("Could not open Process", $cmd);
+	
+	$out = '';
+	do {
+		$o = fread($h, 2048);
+		if ($o === false)
+			break;
+		else
+			$out .= $o;
+	} while(!feof($h));
+	
+	$lines = explode("\n", $out);
+	
+	pclose($h);
+	
+	// $desc = array(
+		  // 0 => array('pipe', 'r') // STDIN
+		// , 1 => array('pipe', 'w') // STDOUT
+		// , 2 => array('pipe', 'w') // STDERR
+	// );
+	// $cwd = NULL; // $_SERVER['DOCUMENT_ROOT'];
+	// $env = NULL; //array();
+	
+	// $p = proc_open($cmd, $desc, $pipes, $cwd, $env);
+	
+	// if ($p === false || !is_resource($p))
+		// throw new SolarExecException("Could not open Process", $cmd);
+	
+	// var_dump( proc_get_status($p) ); 
+	
+	// $pIn  = $pipes[0];
+	// $pOut = $pipes[1];
+	// $pErr = $pipes[2];
+	
 		
-	if ($rc != 0)
-		throw new Exception("RC ${rc}");
+	// $err = stream_get_contents($pErr);
+	// $out = stream_get_contents($pOut);
+	
+	// fclose($pIn);
+	// fclose($pOut);
+	// fclose($pErr);
+	
+	// if (strlen($err) > 0)
+		// throw new SolarExecException($err, $cmd);
+	
+	// $lines = explode("\n", trim($out));
+	
+	//exec($cmd, $lines, $rc);
+	//if ($rc != 0)
+	//	throw new SolarExecException("Execution failed", -1, $cmd);
 	
 	return $lines;
 }
@@ -52,17 +107,6 @@ function getScriptCmd($script, $lineSep = "\n") {
 	
 	return implode($lineSep, $lines);
 }
-
-// function getCommand($cmdID) {
-
-	// if (!isset($_SERVER['SOLAR_CONFIG']['COMMANDS']))
-		// throw new Exception("no commands configured");
-		
-	// if (!isset($_SERVER['SOLAR_CONFIG']['COMMANDS'][$cmdID]))
-		// throw new Exception("command '${cmdID}' is not configured");
-	
-	// return $_SERVER['SOLAR_CONFIG']['COMMANDS'][$cmdID];
-// }
 
 
 // expands all variables used in a command and returns an array of
@@ -177,9 +221,24 @@ function getTransformScripts() {
 function getOverviewScripts() {
 	$scripts = array();
 	$files   = dir_listing('./overview');
-	
+		
 	foreach ($files as $file) {
 		if (file_ext($file) != 'js')
+			continue;
+		
+		$id   = file_wo_ext($file);
+		$path = 'overview/' . $file;
+		$scripts[$id] = $path;
+	}
+	return $scripts;
+}
+
+function getOverviewStyles() {
+	$scripts = array();
+	$files   = dir_listing('./overview');
+		
+	foreach ($files as $file) {
+		if (file_ext($file) != 'css')
 			continue;
 		
 		$id   = file_wo_ext($file);
@@ -198,10 +257,12 @@ function displayException(Exception $e) {
 	echo "<pre>${trace}</pre>";
 }
 
-function jsonError($msg) {
+function jsonError($code, $msg, $details = array()) {
 	$err = array(
-		"error"   => true,
-		"message" => $msg
+		  "error"   => true
+		, "code"    => $code
+		, "msg"     => $msg
+		, "details" => $details
 	);
 	echo json_encode( $err );
 	exit;

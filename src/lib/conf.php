@@ -16,7 +16,8 @@ function parseIniFile($file) {
 	
 	$iniUC = uppercaseConfKeys($ini);
 	$conf = array(
-		  'DEVSETS'  => array()
+		  'MACROS'   => array()
+		, 'DEVSETS'  => array()
 		, 'COMMANDS' => array()
 		, 'FILTERS'  => array()
 		, 'PROBES'   => array()
@@ -26,8 +27,16 @@ function parseIniFile($file) {
 	
 	foreach ($iniUC as $section => $sectionConf) {
 		
+		// macros
+		if ($section == 'MACROS') {
+			foreach ($sectionConf as $name => $value) {
+				$macro = '%' . strtoupper($name);
+				$conf['MACROS'][$macro] = $value;
+			}
+		}
+		
 		// devsets
-		if (preg_match("/DEVSET-(.+)/i", $section, $matches)) {
+		else if (preg_match("/DEVSET-(.+)/", $section, $matches)) {
 			$match = $matches[1];
 			if (!ctype_digit($match))
 				throw new Exception("Invalid Non-Numeric ${section}");
@@ -41,7 +50,7 @@ function parseIniFile($file) {
 		}
 				
 		// filters
-		else if (preg_match("/FILTER-(.+)/i", $section, $matches)) {
+		else if (preg_match("/FILTER-(.+)/", $section, $matches)) {
 			$match = $matches[1];
 			if (!ctype_digit($match))
 				throw new Exception("Invalid Non-Numeric ${section}");
@@ -58,7 +67,7 @@ function parseIniFile($file) {
 		}
 		
 		// probes
-		else if (preg_match("/PROBE-(.+)/i", $section, $matches)) {
+		else if (preg_match("/PROBE-(.+)/", $section, $matches)) {
 			$match = $matches[1];
 			if (preg_match("/[^a-z0-9_]/i", $match))
 				throw new Exception("Invalid Special-Chars ${section}");
@@ -82,14 +91,6 @@ function parseIniFile($file) {
 			
 			$conf['PROBES'][$probeID] = $sectionConf;
 		}
-		
-		// commands
-		// else if ($section == 'COMMANDS') {
-			// foreach ($sectionConf as $cmdID => $cmd) {
-				// $cmdID_LC = strtolower($cmdID);
-				// $conf['COMMANDS'][$cmdID_LC] = $cmd;
-			// }
-		// }
 		
 		// anything else
 		else {

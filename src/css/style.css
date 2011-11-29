@@ -11,11 +11,14 @@ body {
 	display: none !important;
 }
 
-li, label, a, header, footer, h1, th, time {
+.small {
+	font-size: small;
+}
+
+li, label, a, header, footer, h1, th, time, td, th {
 	font-family: Tahoma, Geneva, sans-serif;
 	color: black
 }
-
 
 #panel {
 	position: fixed;
@@ -66,16 +69,12 @@ li, label, a, header, footer, h1, th, time {
 	border-radius: 3px;
 }
 
-#probe-refresh {
+#probe-auto-refresh {
 	margin-left: 10px;
 	padding: 1px 5px;
 	border: 1px solid #72869A;
 	border-radius: 2px;
-}
-
-#probe-refresh label,
-#probe-refresh input {
-	font-size: 0.70em;
+	font-size: 0.8em;
 }
 
 #probe-refresh-toggle {
@@ -96,33 +95,32 @@ li, label, a, header, footer, h1, th, time {
 	margin: 10px;
 	padding: 5px;
 	border-radius: 5px;
-	/* margin-top: 4em; */
+	min-height: 5em;
 }
 
-#overview  ul {
-	list-style-type: none;
-	margin: 10px;
-	padding: 0;
+#overview td.label {
+	padding-right: 3em;
 }
 
-#overview li {
-	padding: 0;
-	margin: 1e;
+#overview td.view {
+	font-size: 0.9em;
 }
 
-#overview li label {
-	display: inline-block;
-	width: 20em;
+#overview tbody {
+	margin-bottom: 1em;
 }
 
-#overview li meter {
-	display: inline-block;
+#overview td {
+	padding-right: 1em;
+}
+
+#overview td.view meter {
 	width: 10em;
 	height: 1em;
 }
 
+
 #probes {
-	/* margin-top: 4em; */
 }
 
 .probe  {

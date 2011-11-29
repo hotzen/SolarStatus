@@ -1,0 +1,14 @@
+#overview-top td.view {
+}
+
+#overview-top td.view input {
+	width: 20em;
+	font-family: monospace;
+	background-color: transparent;
+	border: 1px solid #CCC;
+	margin-right: 1em;
+}
+
+#overview-top td.view .cpu-load {
+	padding-right: 0.5em;
+}

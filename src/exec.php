@@ -62,10 +62,19 @@ try {
 	
 	// ERROR
 	else {
-		jsonError( "PROBE_INVALD_CONF:${probeID}" );
+		jsonError('CONF', "Invalid Probe-Config", array('probe' => $probeID));
 	}
 		
+} catch (SolarExecException $e) {
+	$details = array(
+		  'probe' => $probeID
+		, 'cmd'   => $e->cmd
+	);
+	jsonError('EXEC', $e->getMessage(), $details);
+
 } catch (Exception $e) {
-	$msg = $e->getMessage();
-	jsonError( "PROBE_EXEC_FAIL:${probeID}:${msg}" );
+	$details = array(
+		  'probe' => $probeID
+	);
+	jsonError('EXEC', $e->getMessage(), $details);
 }
