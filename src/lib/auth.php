@@ -1,4 +1,11 @@
 <?php
+function requiresAuth() {
+	return (
+		isset($_SERVER['SOLAR_CONFIG']['AUTH']) &&
+		isset($_SERVER['SOLAR_CONFIG']['AUTH']['PASSWORD'])
+	);
+}
+
 function isLogin(&$challenge, &$response) {
 	if (!isset($_REQUEST['auth']) || !isset($_REQUEST['c']) || !isset($_REQUEST['r']))
 		return false;
@@ -27,7 +34,7 @@ function login($challenge, $response, &$token) {
 function isAuthorized(&$token = NULL) {
 			
 	// auth disabled
-	if (!isset($_SERVER['SOLAR_CONFIG']['AUTH']))
+	if (!requiresAuth())
 		return true;
 	
 	// not passed, fetch from request
@@ -60,15 +67,6 @@ function generateExpectedResponse($challenge) {
 	return sha1( $challenge . $_SERVER['SOLAR_CONFIG']['AUTH']['PASSWORD'] );
 }
 
-// function generateToken() {
-	// $secret = $_SERVER['SOLAR_CONFIG']['AUTH']['SECRET'];
-	// $hours  = round(time() / (3 * 3600));
-	// $ip     = $_SERVER['REMOTE_ADDR'];
-	// $ua     = $_SERVER['HTTP_USER_AGENT'];
-	
-	// return sha1( $secret . $hours . $ip . $ua );
-// }
-
 function generateToken($time = NULL) {
 	if ($time === NULL)
 		$time = time();
@@ -82,9 +80,7 @@ function generateToken($time = NULL) {
 }
 
 function checkToken($t) {
-
-	// auth disabled
-	if (!isset($_SERVER['SOLAR_CONFIG']['AUTH']))
+	if (!requiresAuth())
 		return true;
 	
 	$ps = explode('$', $t);
@@ -116,7 +112,7 @@ function getLoginForm($failed) {
 		
 	$o = <<<EOC
 	<h1>${header}</h1>
-	<form id="auth" name="auth" action="${self}" method="POST">
+	<form id="auth" name="auth" action="${self}" method="GET">
 		<input name="c" type="hidden" value="${challenge}" />
 		<input name="r" type="hidden" value="" />
 		<input name="p" type="password" value="" autofocus="autofocus" />

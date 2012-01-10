@@ -18,7 +18,7 @@ function execRaw($cmd) {
 	
 	$h = popen("${cmd} 2>&1", 'r');
 	
-	if ($h === false)
+	if (!is_resource($h))
 		throw new SolarExecException("Could not open Process", $cmd);
 	
 	$out = '';

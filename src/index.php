@@ -6,7 +6,7 @@ require 'lib/solar.php';
 ?>
 <html>
 <head>
-	<title>SolarStatus v0.7</title>
+	<title>SolarStatus v0.7.1</title>
 	<link href="css/style.css" rel="stylesheet" type="text/css"></link>
 	
 	<!-- CORE -->
