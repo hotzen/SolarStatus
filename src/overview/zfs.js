@@ -34,25 +34,26 @@ function solar_overview_zfs(rows) {
 		var poolData = rows[i].splitBlanks()
 		var poolName = poolData[0]
 		
-		var used  = poolData[1]
-		var avail = poolData[2]
+		var usedRaw = poolData[1]
+		var usedNum = parseFloat(usedRaw.substr(0, usedRaw.length-1))
+		var usedUnit = usedRaw.substr(usedRaw.length-1, 1)
+	    
+		var availRaw = poolData[2]
+		var availNum = parseFloat(availRaw.substr(0, availRaw.length-1))
+		var availUnit = availRaw.substr(availRaw.length-1, 1)
 		
-		var usedNum  = parseFloat( used.substr(0, used.length-1)   )
-		var availNum = parseFloat( avail.substr(0, avail.length-1) )
+		var aligned = alignUnits(usedNum, usedUnit, availNum, availUnit)
+		var used  = aligned[0]
+		var avail = aligned[1]
+		var unit  = aligned[2]
 		
-		var usedUnit  = used.substr(used.length-1,1)
-		var availUnit = avail.substr(avail.length-1,1)
-		
-		if (usedUnit != availUnit) {
-			if (console && console.warn)
-				console.warn(["solar_overview_zfs: different units in used vs. avail, aborting", used, avail])
-			continue;
-		}
-		
-		var capacity = (usedNum + availNum).toFixed(2)
+		var capacity = used + avail //.toFixed(2)
+		var capacityAligned = convertToGreatestUnit(capacity, unit)
+		var capacityAlignedNum = capacityAligned[0].toFixed(2)
+		var capacityAlignedUnit = capacityAligned[1]
 		
 		var lbl = "ZFS Pool " + poolName
-		var $meter = $("<meter></meter").attr("title", "Used "+used+" of "+capacity+usedUnit).attr("min", 0).attr("max", capacity).attr("value", usedNum)
+		var $meter = $("<meter></meter").attr("title", "Used "+used+unit+" of "+capacityAlignedNum+capacityAlignedUnit).attr("min", 0).attr("max", capacity).attr("value", used)
 		
 		res.push([lbl, $meter])
 	}
