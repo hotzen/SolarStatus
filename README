@@ -2,16 +2,16 @@
 Web-Interface for Solaris-Servers to display Status-Information
 ================================================================
 
-The Interface is based on minimalistic HTML5 with jQuery (Java-Script)
+The Interface is based on minimalistic HTML5 with Java-Script (jQuery)
 
-Tested on Solaris 11 Express, targeted for Open Indiana as well
-	
+Formerly tested on Solaris 11 Express, now used and developed under OmniOS Stable.
+It is usable under *any* Unix/Linux, only the shipped default commands are somewhat Unix/Illumos & ZFS focused.
+
 Installation:
 	see install directory
 	
 Configuration:
 	see conf.ini.php
-	see scripts-directory
 
 Screenshot: https://github.com/hotzen/SolarStatus/tree/master/screenshots
 Download:   https://github.com/hotzen/SolarStatus/tree/master/dist
@@ -19,11 +19,6 @@ Download:   https://github.com/hotzen/SolarStatus/tree/master/dist
 Feedback appreciated
 
 Cheers,
-Kai <kai_at_meder_d0t_info>
+Kai
 
 I put SolarStatus under the MIT License, see the attached LICENSE file.
-
-Roadmap:
-- uname-script does not output anything, hint appreciated
-- enhance overview-page
-- include graphs into overview-page (jquery-sparklines)
