@@ -1,4 +1,4 @@
-function solar_transform_nicstat(elem, cmd, rc, out) {
+// function solar_transform_nicstat(elem, cmd, rc, out) {
 	var tbl = new TableTransformer()
 		
 	tbl.header("Time", "Time")
