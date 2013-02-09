@@ -1,12 +1,16 @@
-<!DOCTYPE HTML>
 <?php
+ob_start();
+
 require 'lib/conf.php';
 require 'lib/auth.php';
 require 'lib/solar.php';
+
+initSession();
 ?>
+<!DOCTYPE HTML>
 <html>
 <head>
-	<title>SolarStatus v0.7.2</title>
+	<title>SolarStatus v0.8</title>
 	<link href="css/style.css" rel="stylesheet" type="text/css"></link>
 	
 	<!-- CORE -->
@@ -56,35 +60,47 @@ try {
 	exit;
 }
 
-$password = $challenge = $response = $token = NULL;
+$password = $challenge = $response = NULL;
 
-if (isLogin($challenge, $response)) {
-	if (!login($challenge, $response, $token)) {
-		echo getLoginForm(true);
-		echo "</body></html>";
-		exit;
-	} else {
-		reloadTokenized($token);
-	}
-}
-
-if (!isAuthorized($token)) {
-	echo getLoginForm(false);
+if (isLogout()) {
+	doLogout();
+	
+	echo getLoginForm("Logout successful, please login");
 	echo "</body></html>";
 	exit;
 }
 
+if (isLogin($challenge, $response)) {
+	if (checkLogin($challenge, $response)) {
+		doLogin();
+		
+		header("Location: ${_SERVER['PHP_SELF']}");
+		exit;
+	} else {
+		echo getLoginForm("Login failed, please retry");
+		echo "</body></html>";
+		exit;
+	}
+}
+
+if (!checkAuth()) {
+	echo getLoginForm("Please login");
+	echo "</body></html>";
+	exit;
+}
+
+updateSession();
 ?>
 <script type="text/javascript">
 window.SOLAR = {
-	  SELF:         "<?php echo $_SERVER['PHP_SELF']; ?>"
-	, AUTH_TOKEN:   "<?php echo $token; ?>"
-	, AUTH_EXPIRED: false
+	  SELF: "<?php echo $_SERVER['PHP_SELF']; ?>"
+	, AUTH: true
 }
 </script>
-<?php unset($password, $challenge, $response, $token); ?>
+<?php unset($password, $challenge, $response); ?>
 
 <nav id="panel">
+	<a id="logout" href="?logout=true"><img src="img/logout.png" title="logout" /></a>
 	<ul id="probe-filters">
 		<li class="overview"><a href="#overview" title="Display Overview" data-filter=".overview">Overview</a></li>
 		<?php
@@ -98,7 +114,6 @@ window.SOLAR = {
 
 				echo <<<EOC
 		<li class="${clazzSel}"><a href="#filter" title="Display ${label}" data-filter="${selector}">${label}</a></li>
-
 EOC;
 			}
 		} catch (Exception $e) {
@@ -110,6 +125,7 @@ EOC;
 			<label><input id="probe-refresh-toggle" type="checkbox" name="probe_refresh_toggle" value="1" /> Auto refresh</label>
 			<label> every <input id="probe-refresh-freq" type="number" name="probe_refresh_freq" min="1" value="3" /> seconds</label>
 		</li>
+		
 	</ul>
 </nav>
 
@@ -156,7 +172,7 @@ EOC;
 			$confirmText = expandVars($confirmText, array('\n' => "\n"));
 			
 			$confirmData = <<<EOC
-<div class="result odd first last"><code>explicitly refresh to execute</code><pre>${confirmText}</pre></div>
+<div class="result odd first last"><code>refresh to execute</code><pre>${confirmText}</pre></div>
 EOC;
 		} else {
 			$confirmText = "";
@@ -164,8 +180,7 @@ EOC;
 		}
 		
 		$probeClazz = implode(' ', $probeClazzes);
-				
-		// OUTPUT
+
 		echo <<<EOC
 	<div id="${probeID}" class="probe ${probeClazz} hide" data-confirm="${confirmText}">
 		<header>
@@ -176,14 +191,15 @@ EOC;
 			</ul>
 			<a href="#refresh" class="refresh" title="Refresh"></a>
 			<div class="failure hide"></div>
+			<a href="#view-full" class="view-full" title="View full"></a>
+			<a href="#select" class="select" title="Select"></a>
 		</header>
-		<div class="raw">${confirmData}</div>
+		<div class="raw selected">${confirmData}</div>
 		<div class="transformed hide"></div>
 		<footer>
 			<time datetime="" data-timestamp=""></time>
 		</footer>
 	</div>
-
 EOC;
 	}
 	?>

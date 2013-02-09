@@ -1,144 +1,134 @@
 
 function TableTransformer() {
-	this._ignores = []
-	this._columns = []
-	this._footer  = {}
+	this.ignoreDefs = []
+	this.headerDefs = []
+	this.footerDefs  = {}
 
 	// trim & lowercase
-	this.patterize = function(s) {
-		if (!s)
-			return null
-		return s.replace(/^\s+/, '').replace(/\s+$/, '').toLowerCase()
+	this.pack = function(string) {
+		if (string) return string.replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/, " ").toLowerCase()
+		else return null
+	}
+			
+	this.ignore = function(string) {
+		var def = {
+			string: string,
+			packed: this.pack( string )
+		}
+		this.ignoreDefs.push(def)
+		return def
+	}
+	
+	/**
+	 * defines a header-column, detected by <string>
+	 * <info> is shown as the html title-attribute to display informational text
+	 * optional zero-based <index>, data is only detected as a header when the <index> specification matches the data 
+	 * optional <label>, that overwrites what is displayed if the column is detected as a header.
+	*/
+	this.header = function(string, info, index, label) {
+		var def = {
+			string: string,
+			packed: this.pack( string ),
+			index: index || -1,
+			info: info,
+			label: label || null
+		}
+		this.headerDefs.push(def)
+		return def
 	}
 		
-	this.ignore = function(pattern) {
-		var def = {
-			pattern: this.patterize( pattern )
-		}
-		this._ignores.push(def)
-		return def
-	}
-
-	this.col = function(pattern, info) {
-		var def = {
-			pattern: this.patterize( pattern ),
-			//label:	 label,
-			info:    info
-		}
-		this._columns.push(def)
-		return def
-	}
-	
 	this.footer = function(prefix) {
-		this._footer = {
-			prefix:	this.patterize(prefix)
+		this.footerDefs = {
+			prefix:	this.pack(prefix)
 		}
 	}
 	
-	this.superCol = function(pattern, info, subPatterns) {
+	this.superCol = function(x, info, subPatterns) {
 		// TODO
 	}
 
 	this.isIgnore = function(data) {
-		var dataLC = data.toLowerCase()
-		for (var i=0; i<this._ignores.length; ++i) {
-			if (dataLC.indexOf(this._ignores[i].pattern) != -1)
+		var	packed = this.pack(data)
+
+		for (var i=0; i<this.ignoreDefs.length; ++i) {
+			if (data.indexOf(this.ignoreDefs[i].string) > -1)
+				return true
+			
+			if (this.ignoreDefs[i].packed == packed)
 				return true
 		}
 		return false
 	}
 	
-	this.checkHeaderCol = function(data) {
-		var dataLC = data.toLowerCase()
-		var maxPatternLength = -1
-		var bestColDef = false
+	this.isHeaderCol = function(data, index) {
+		var packed = this.pack(data)
+		var bestMatchingDef = null
 		
-		for (var k=0; k<this._columns.length; ++k) {
-			var colDef = this._columns[k]
+		for (var k=0; k<this.headerDefs.length; ++k) {
+			var hdrDef = this.headerDefs[k]
+						
+			var indexOK = (hdrDef.index < 0) || (hdrDef.index == index)
+			var packedMatch = (hdrDef.packed == null) || (packed == hdrDef.packed)
 			
-			if (dataLC.indexOf(colDef.pattern) != -1 && colDef.pattern.length > maxPatternLength) {
-				maxPatternLength = colDef.pattern.length
-				bestColDef = colDef
+			if (indexOK && packedMatch) {
+				if (bestMatchingDef) {
+					if (bestMatchingDef.packed.length < hdrDef.packed)
+						bestMatchingDef = hdrDef
+				} else
+					bestMatchingDef = hdrDef
 			}
 		}
 		
-		return bestColDef
+		return bestMatchingDef
 	}
 	
-	this.transform = function(dataRows, container) {
+	this.create = function(out, container) {
 		var that = this
-
+		var lines = out.split("\n")
+		
 		var table = document.createElement("table")
 		container.appendChild( table )
 		
 		var tbody = null
-		
-		// split into rows
-		//var dataRows = data.split("\n")
-		
-		// for each row ...
-		for (var i=0; i<dataRows.length; ++i) {
-			var dataRow = dataRows[i]
+				
+		for (var i=0; i<lines.length; ++i) {
+			var line = lines[i]
 			
-			// console.log(["parsing row", i])
-			if (this.isIgnore(dataRow)) {
+			if (this.isIgnore(line)) {
 				continue
 			}
 			
 			// trim, then split by whitespaces
-			var dataCols = dataRow.replace(/^\s+/, '').replace(/\s+$/, '').split(/\s+/)
+			var split = line.replace(/^\s+/, '').replace(/\s+$/, '').split(/\s+/)
 			var cols = []
 
-			// for each column ...
-			for (var j=0; j<dataCols.length; ++j) {
-				var dataCol = dataCols[j]
-				var colDef  = this.checkHeaderCol( dataCol )
-				
-				if (colDef)
-					cols.push({
-							isHeader: true,
-							data: 	  dataCol,
-							def:  	  colDef
-						})
-				else
-					cols.push({
-						isHeader: false,
-						data:     dataCol
-					})
-			}
-			
-			// console.log(["cols of row", i, cols])
-			
 			var cntHeaders = 0
-			var cntData    = 0
 			
-			cols.forEach(function(col) {
-				if (col.isHeader)
+			for (var j=0; j<split.length; ++j) {
+				var data = split[j]
+				var hdrDef = this.isHeaderCol(data, j)
+
+				if (hdrDef) {
 					cntHeaders++
-				else
-					cntData++
-			})
-			
-			var ratio = cntHeaders / (cntHeaders + cntData)
-			
-			// found header- as well as data-columns: implicitly transform data-columns to headers
-			if (cntHeaders > 0 && cntData > 0 && ratio > 0.7) {
-				cols = cols.map(function(col) {
-					// do not transform headers
-					if (col.isHeader)
-						return col
-					//console.log(["transforming column to header-column", col.data])
-					return {
-						isHeader: true,
-						data:     col.data,
-						def:      that.col(col.data, "")
-					}
-				})
+					cols.push({
+						header: true,
+						def:	hdrDef,
+						data: 	data
+					})
+				} else {
+					cols.push({
+						header: false,
+						def:    null,
+						data: 	data,
+					})
+				}
 			}
 			
-			var headers = cols.every(function(col) { return col.isHeader })
-									
-			if (headers) {
+			var ratioHeaders = (cntHeaders / cols.length)
+			
+			var isHeaderLine = (cntHeaders >= 3 || ratioHeaders > 0.5) ? true : false
+			
+			if (isHeaderLine) {
 				var thead = document.createElement("thead")
 				table.appendChild( thead )
 				
@@ -148,16 +138,27 @@ function TableTransformer() {
 				var tr = document.createElement("tr")
 				thead.appendChild(tr)
 				
-				cols.forEach(function(col) {
+				for (var j=0; j<cols.length; ++j) {
+					var col = cols[j]
+					
 					var th = document.createElement("th")
 					tr.appendChild(th)
-					th.innerHTML = col.data // col.def.label
-					th.setAttribute("title", col.def.info)
-				})
+					
+					if (col.def && col.def.label)
+						th.innerHTML = col.def.label
+					else
+						th.innerHTML = col.data
+					
+					if (col.def && col.def.info)
+						th.setAttribute("title", col.def.info)
+				}
 			} else {
-				if (!tbody)
-					throw "no header-columns, no <tbody> defined"
-			
+				if (!tbody) {
+					//XXX really? 
+					tbody = document.createElement("tbody")
+					table.appendChild( tbody )
+				}
+
 				var tr = document.createElement("tr")
 				tbody.appendChild(tr)
 			

@@ -1,12 +1,14 @@
 function solar_overview_zpool_status(rows) {
-	var data = rows.join(" ").toLowerCase()
-	var $span;
-		
+	var data = rows.join("\n").toLowerCase()
+	var $elem;
+	
 	if (data.indexOf("all pools are healthy") != -1) {
-		$span = $("<span></span>").text("All pools are healthy")
+		$elem = $("<span>All pools are healthy</span>")
 	} else {
-		$span = $("<span></span>").text("Failures, please check!").css("background-color", "red")
+		$elem = $("<span></span>")
+		$("<span>Failures, please check!</span>").addClass("warn").appendTo($elem)
+		$("<pre></pre>").text( data ).appendTo($elem)
 	}
 	
-	return [ ["ZFS Pool Status", $span] ]
+	return [ ["ZFS Pool Status", $elem] ]
 }

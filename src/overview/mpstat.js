@@ -9,7 +9,7 @@ function solar_overview_mpstat(rows) {
 	var numCores = (rows.length - 3) / 2
 	var startIdx = numCores + 2
 	
-	console.log(["solar_overview_mpstat", rows])
+	//console.log(["solar_overview_mpstat", rows])
 	
 	var res = []
 	
@@ -18,7 +18,7 @@ function solar_overview_mpstat(rows) {
 		var coreIdx  = startIdx + c
 		var coreData = rows[coreIdx]
 		
-		console.log(["coreNum", coreNum, "coreIdx", coreIdx, "coreData", coreData])
+		//console.log(["coreNum", coreNum, "coreIdx", coreIdx, "coreData", coreData])
 		
 		var cols = coreData.splitBlanks()
 		

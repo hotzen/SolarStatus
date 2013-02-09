@@ -43,7 +43,7 @@ function dateTimeHuman(ts) {
 	       // comps.hours + TIME_SEP + comps.mins  + TIME_SEP + comps.secs
 	
 	var d = new Date(ts)
-	return d.toLocaleDateString() + " @ " + d.toLocaleTimeString()
+	return d.toLocaleDateString() + " - " + d.toLocaleTimeString()
 }
 
 function dateTimeComps(ts) {

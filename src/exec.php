@@ -3,6 +3,7 @@ require 'lib/conf.php';
 require 'lib/auth.php';
 require 'lib/solar.php';
 
+initSession();
 header('Content-Type: text/javascript');
 
 try {
@@ -11,7 +12,7 @@ try {
 	jsonError( 'NO_CONFIG' );
 }
 
-if (!isAuthorized()) {
+if (!checkAuth()) {
 	jsonError( 'NO_AUTH' );
 }
 
@@ -25,25 +26,30 @@ if (!isset($_SERVER['SOLAR_CONFIG']['PROBES'][$probeID])) {
 	jsonError( "INVALID_PROBE:${probeID}" );
 }
 
+updateSession();
+
 $probeConf = $_SERVER['SOLAR_CONFIG']['PROBES'][$probeID];
 
 try {
-	$newToken = generateToken();
+	$start = durationStart();
 	$execTime = time() * 1000;
 	
 	$res = array(
-		'token'  => $newToken,
-		'time'	 => $execTime,
-		'result' => array()
+		  'probe'    => $probeID
+		, 'time'     => $execTime
+		, 'duration' => -1
+		, 'result'   => array()
 	);
 	
 	// SCRIPT
 	if (isset($probeConf['SCRIPT'])) {
 		$script = $probeConf['SCRIPT'];
 		$cmd    = getScriptCmd($script);
-		$output = execScript($script);
+		$rc     = -1;
+		$output = execScript($script, $rc);
 		
-		$res['result'][] = array($cmd, $output);
+		$res['result'][] = array($cmd, $rc, $output);
+		$res['duration'] = duration($start);
 		
 		echo json_encode( $res );
 	}
@@ -53,9 +59,11 @@ try {
 		$cmds = expandCommand( $probeConf['CMD'] );
 		
 		foreach ($cmds as $cmd) {
-			$output = execRaw($cmd);
-			$res['result'][] = array($cmd, $output);
+			$rc = -1;
+			$output = execCommand($cmd, $rc);
+			$res['result'][] = array($cmd, $rc, $output);
 		}
+		$res['duration'] = duration($start);
 		
 		echo json_encode( $res );
 	}

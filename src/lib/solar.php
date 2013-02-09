@@ -9,15 +9,14 @@ class SolarExecException extends Exception {
 }
 
 function execScript($script, &$rc = NULL) {
-	return execRaw(getScriptPath($script), $rc);
+	return execCommand(getScriptPath($script), $rc);
 }
 
 // RAW, UNCHECKED, UNSAFE
-function execRaw($cmd) {
+function execCommand($cmd, &$rc = NULL) {
 	$lines = array();	
 	
 	$h = popen("${cmd} 2>&1", 'r');
-	
 	if (!is_resource($h))
 		throw new SolarExecException("Could not open Process", $cmd);
 	
@@ -30,47 +29,9 @@ function execRaw($cmd) {
 			$out .= $o;
 	} while(!feof($h));
 	
-	$lines = explode("\n", $out);
+	$rc = pclose($h);
 	
-	pclose($h);
-	
-	// $desc = array(
-		  // 0 => array('pipe', 'r') // STDIN
-		// , 1 => array('pipe', 'w') // STDOUT
-		// , 2 => array('pipe', 'w') // STDERR
-	// );
-	// $cwd = NULL; // $_SERVER['DOCUMENT_ROOT'];
-	// $env = NULL; //array();
-	
-	// $p = proc_open($cmd, $desc, $pipes, $cwd, $env);
-	
-	// if ($p === false || !is_resource($p))
-		// throw new SolarExecException("Could not open Process", $cmd);
-	
-	// var_dump( proc_get_status($p) ); 
-	
-	// $pIn  = $pipes[0];
-	// $pOut = $pipes[1];
-	// $pErr = $pipes[2];
-	
-		
-	// $err = stream_get_contents($pErr);
-	// $out = stream_get_contents($pOut);
-	
-	// fclose($pIn);
-	// fclose($pOut);
-	// fclose($pErr);
-	
-	// if (strlen($err) > 0)
-		// throw new SolarExecException($err, $cmd);
-	
-	// $lines = explode("\n", trim($out));
-	
-	//exec($cmd, $lines, $rc);
-	//if ($rc != 0)
-	//	throw new SolarExecException("Execution failed", -1, $cmd);
-	
-	return $lines;
+	return $out;
 }
 
 function getScriptPath($script) {
@@ -117,22 +78,10 @@ function expandCommand($cmd) {
 	} else {
 		$macros = array();
 	}
-	
-	// expand macros
-	$cmdVarExp = expandVars($cmd, $macros);
 
-	// expand dev-sets
+	$cmdVarExp = expandVars($cmd, $macros);
 	$cmdsDevSetExp = expandDevSets( $cmdVarExp );
-	
-	// check for invalid variables
-	/*
-	foreach ($cmdsDevSetExp as $cmdDevSetExp) {
-		if (preg_match('/(%.+)/', $cmdDevSetExp, $matches))
-			throw new Exception("invalid variable '${matches[1]}' used in command '${cmd}'");
-	}
-	*/
-	
-	// done
+
 	return $cmdsDevSetExp;
 }
 
@@ -257,13 +206,22 @@ function displayException(Exception $e) {
 	echo "<pre>${trace}</pre>";
 }
 
-function jsonError($code, $msg, $details = array()) {
+function jsonError($code, $msg = "", $details = array()) {
 	$err = array(
 		  "error"   => true
 		, "code"    => $code
 		, "msg"     => $msg
 		, "details" => $details
 	);
+	ob_end_clean();
 	echo json_encode( $err );
 	exit;
+}
+
+function durationStart() {
+	return microtime(true);
+}
+
+function duration($start) {
+	return microtime(true) -  $start;
 }
