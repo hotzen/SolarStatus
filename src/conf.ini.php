@@ -1,4 +1,5 @@
-; <?php exit; ?>
+#!/usr/bin/php
+; <?php exit; __halt_compiler(); ?>
 dir_scripts = ./scripts
 
 ;##############################################################################
@@ -445,5 +446,4 @@ label   = "SMART Perform Long Self-Test"
 class   = probe-smart
 cmd     = "%SMARTCTL --test=long -d sat,12 %DEVSET-1"
 order   = 93
-confirm = "SMART commands will wake-up your disks!\nPerform a LONG Self-Test?"
 confirm = "SMART commands will wake-up your disks!\nPerform a LONG Self-Test?"

@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 require 'lib/conf.php';
 require 'lib/auth.php';

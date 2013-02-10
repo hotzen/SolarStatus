@@ -1,17 +1,24 @@
+#!/usr/bin/php
 <?php
 function loadConfig() {
 	$file = './conf.ini.php';
-	$conf = parseIniFile( $file );
-		
+	$conf = parseConfig( $file );
 	$_SERVER['SOLAR_CONFIG'] = $conf;
 }
 
-function parseIniFile($file) {
+function parseConfig($file) {
 	if (!is_readable($file))
 		throw new Exception("conf.ini.php not readable");
-
-	$ini = parse_ini_file($file, true);
-	if (!$ini)
+	
+	$content = file_get_contents($file);
+	if ($content === false)
+		throw new Exception("could not read conf.ini.php");
+	
+	$firstNewlinePos = strpos($content, "\n");
+	$parseableContent = substr($content, $firstNewlinePos+1);
+	
+	$ini = parse_ini_string($parseableContent, true);
+	if ($ini === false)
 		throw new Exception("could not parse conf.ini.php");
 	
 	$iniUC = uppercaseConfKeys($ini);
@@ -22,7 +29,7 @@ function parseIniFile($file) {
 		, 'FILTERS'  => array()
 		, 'PROBES'   => array()
 	);
-		
+
 	$probesAutoOrder = 1000;
 	
 	foreach ($iniUC as $section => $sectionConf) {
@@ -101,7 +108,7 @@ function parseIniFile($file) {
 	// sort
 	ksort($conf['FILTERS']);
 	uasort($conf['PROBES'], 'probeComparator');
-		
+
 	return $conf;
 }
 
@@ -123,7 +130,6 @@ function probeComparator($p1, $p2) {
 	$o1 = $p1['ORDER'];
 	$o2 = $p2['ORDER'];
 	
-	if ($o1 == $o2)
-		return 0;
-	return ($o1 < $o2) ? -1 : +1;
+	if ($o1 == $o2) return 0;
+	else return ($o1 < $o2) ? -1 : +1;
 }

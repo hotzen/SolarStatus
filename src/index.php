@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 ob_start();
 
@@ -10,7 +11,7 @@ initSession();
 <!DOCTYPE HTML>
 <html>
 <head>
-	<title>SolarStatus v0.8</title>
+	<title>SolarStatus v0.8.1</title>
 	<link href="css/style.css" rel="stylesheet" type="text/css"></link>
 	
 	<!-- CORE -->

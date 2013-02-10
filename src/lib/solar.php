@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 class SolarExecException extends Exception {
 	var $cmd;

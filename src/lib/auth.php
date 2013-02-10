@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 function initSession() {
 	ini_set('session.save_path', sys_get_temp_dir());
