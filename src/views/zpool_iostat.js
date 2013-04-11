@@ -1,4 +1,4 @@
-function solar_transform_zpool_iostat(elem, cmd, rc, out) {
+SolarStatus.view("zpool_iostat", function(cmd, rc, out, createView, done) {
 	var tbl = new TableTransformer()
 	
 	tbl.ignore("capacity")
@@ -27,7 +27,7 @@ function solar_transform_zpool_iostat(elem, cmd, rc, out) {
 	//write bandwidth
 	tbl.header("write", "The bandwidth of all write operations, expressed as units per second.", 6, "write bw")
 	
-	tbl.create(out, elem)
-	
-	return "Table"
-}
+	var elem = tbl.create(out)
+	createView("Table", elem)
+	done()
+})

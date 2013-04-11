@@ -6,12 +6,10 @@
 // rpool1/zones              31K  12.9G  /zones               off          off              none
 // tank1                   1.67T  1.89T  /tank1               off          off              none
 // tank1/temp               250K   100G  /tank1/temp          name=temp    off              none
-function solar_overview_zfs(rows) {
-	var res = []
-	
-	for (var i=1; i<rows.length; i++) { // skip first line
-		var firstSpace = rows[i].indexOf(" ")
-		var firstTab   = rows[i].indexOf("\t")
+SolarStatus.overview("zfs", function(cmd, rc, lines, createOverview, done) {
+	for (var i=1; i<lines.length; i++) { // skip first line
+		var firstSpace = lines[i].indexOf(" ")
+		var firstTab   = lines[i].indexOf("\t")
 		
 		var firstPos = 0
 		if (firstSpace < 0) 
@@ -28,10 +26,10 @@ function solar_overview_zfs(rows) {
 			continue
 		
 		// not a pool
-		if (rows[i].substring(0, firstPos).indexOf("/") > 0)
+		if (lines[i].substring(0, firstPos).indexOf("/") > 0)
 			continue
 		
-		var poolData = rows[i].splitBlanks()
+		var poolData = lines[i].splitBlanks()
 		var poolName = poolData[0]
 		
 		var usedRaw = poolData[1]
@@ -48,15 +46,16 @@ function solar_overview_zfs(rows) {
 		var unit  = aligned[2]
 		
 		var capacity = used + avail //.toFixed(2)
+		var percent = parseInt((used / capacity) * 100)
+		
 		var capacityAligned = convertToGreatestUnit(capacity, unit)
 		var capacityAlignedNum = capacityAligned[0].toFixed(2)
 		var capacityAlignedUnit = capacityAligned[1]
 		
-		var lbl = "ZFS Pool " + poolName
-		var $meter = $("<meter></meter").attr("title", "Used "+used+unit+" of "+capacityAlignedNum+capacityAlignedUnit).attr("min", 0).attr("max", capacity).attr("value", used)
-		
-		res.push([lbl, $meter])
-	}
+		var lbl = "ZPool " + poolName
+		var $meter = $("<meter></meter").attr("title", "Used "+used+unit+" ("+percent+"%) of "+capacityAlignedNum+capacityAlignedUnit+".\nStill available: "+avail+unit).attr("min", 0).attr("max", capacity).attr("value", used)
 	
-	return res
-}
+		createOverview(lbl, $meter)
+	}
+	done()
+})

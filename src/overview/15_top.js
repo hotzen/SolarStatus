@@ -17,12 +17,10 @@ Memory: 4094M phys mem, 406M free mem, 2047M total swap, 2047M free swap
    429 root        6  59    0   10M 3528K sleep    0:56  0.00% devfsadmd
    490 root       17  59    0   15M   10M sleep    3:21  0.00% /usr/lib/smbsrv/smbd start
 */
-function solar_overview_top(rows) {
-	var res = []	
-	
-	for (var i=7; i<rows.length; i++) { // skip first 7 lines
-		var row = rows[i]
-		var cols = row.splitBlanks()
+SolarStatus.overview("top", function(cmd, rc, lines, createOverview, done) {
+	for (var i=7; i<lines.length; i++) { // skip first 7 lines
+		var line = lines[i]
+		var cols = line.splitBlanks()
 		
 		var ps = cols.slice(10).join(" ")
 		var cpuTime = cols[8]
@@ -35,9 +33,8 @@ function solar_overview_top(rows) {
 		$view.append( $("<span></span>").addClass("cpu-time").text(cpuTime) )
 		$view.append( $("<span> mins)</span>") )
 		
-		res.push( ["Top Process", $view] )
+		createOverview("Top Process", $view)
 		break;
 	}
-	
-	return res
-}
+	done()
+})

@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 class SolarExecException extends Exception {
 	var $cmd;
@@ -86,19 +85,32 @@ function expandCommand($cmd) {
 	return $cmdsDevSetExp;
 }
 
-function expandDevSets( $cmdIn ) {
-	$cmdsWork = array( $cmdIn );
+function expandDevSets($cmdIn) {
+	$cmdsWork = array($cmdIn);
 	$cmdsDone = array();
 	
 	$devsets = $_SERVER['SOLAR_CONFIG']['DEVSETS'];
 	
+	if (isset($_SERVER['SOLAR_CONFIG']['DEVSET_SEP']))
+		$sep = $_SERVER['SOLAR_CONFIG']['DEVSET_SEP'];
+	else
+		$sep = " ";
+
 	while (($cmd = array_shift($cmdsWork)) !== NULL) {
-		if (($devSetID = extractDevSetID($cmd)) !== NULL) {
-			if (!isset($devsets[$devSetID]))
-				throw new Exception("invalid devset '${devSetID}' used in cmd '${cmdIn}'");
-			$devSet = $devsets[$devSetID];
-			foreach ($devSet as $dev) {
-				$cmdsWork[] = expandDevSetID($cmd, $devSetID, $dev);
+		
+		if (($devsetID = extractDevSetID($cmd, $complete)) !== NULL) {
+			if (!isset($devsets[$devsetID]))
+				throw new Exception("invalid devset '${devsetID}' used in cmd '${cmdIn}'");
+			
+			$devset = $devsets[$devsetID];
+			
+			if ($complete) {
+				$allDevs = implode($sep, $devset);
+				$cmdsWork[] = expandDevSetID($cmd, $devsetID, $allDevs, "!");
+			} else {
+				foreach ($devset as $dev) {
+					$cmdsWork[] = expandDevSetID($cmd, $devsetID, $dev);
+				}
 			}
 		} else {
 			$cmdsDone[] = $cmd;
@@ -107,15 +119,18 @@ function expandDevSets( $cmdIn ) {
 	return $cmdsDone;
 }
 
-function extractDevSetID($cmd) {
-	if (preg_match('/%DEVSET\-(\d+)/', $cmd, $matches))
-		return $matches[1];
-	else
+function extractDevSetID($cmd, &$complete = false) {
+	if (!preg_match('/%DEVSET\-(\d+)(!?)/', $cmd, $matches))
 		return NULL;
+	
+	$id = $matches[1];
+	$complete = isset($matches[2]);
+	
+	return $id;
 }
 
-function expandDevSetID($cmd, $devSetID, $val) {
-	$var = "%DEVSET-${devSetID}";
+function expandDevSetID($cmd, $devSetID, $val, $suffix = "") {
+	$var = "%DEVSET-${devSetID}${suffix}";
 	return expandVars($cmd, array($var => $val));
 }
 
@@ -135,74 +150,33 @@ function splitTrim($str, $sep, $isRegex = false) {
 	return $split;
 }
 
-function file_ext($name) {
+function fileExt($name) {
   return substr(strrchr($name, '.'), 1);
 }
 
-function file_wo_ext($name) {
+function fileNoExt($name) {
 	return substr($name, 0, strrpos($name, '.'));
 }
 
-function dir_listing($path) {
-	$fs = array();
-	$d = opendir($path);
-	while ($f = readdir($d)) {
-		$fs[] = $f;
+function dirListing($dirPath, $sortFiles = true) {
+	$files = array();
+	$d = opendir($dirPath);
+	while ($fileName = readdir($d)) {
+		if ($fileName == '.' || $fileName == '..')
+			continue;
+		$files[] = $fileName;
 	}
 	closedir($d);
-	return $fs;
-}
-
-function getTransformScripts() {
-	$scripts = array();
-	$files   = dir_listing('./transform');
-	
-	foreach ($files as $file) {
-		if (file_ext($file) != 'js')
-			continue;
-		
-		$id   = file_wo_ext($file);
-		$path = 'transform/' . $file;
-		$scripts[$id] = $path;
-	}
-	return $scripts;
-}
-
-function getOverviewScripts() {
-	$scripts = array();
-	$files   = dir_listing('./overview');
-		
-	foreach ($files as $file) {
-		if (file_ext($file) != 'js')
-			continue;
-		
-		$id   = file_wo_ext($file);
-		$path = 'overview/' . $file;
-		$scripts[$id] = $path;
-	}
-	return $scripts;
-}
-
-function getOverviewStyles() {
-	$scripts = array();
-	$files   = dir_listing('./overview');
-		
-	foreach ($files as $file) {
-		if (file_ext($file) != 'css')
-			continue;
-		
-		$id   = file_wo_ext($file);
-		$path = 'overview/' . $file;
-		$scripts[$id] = $path;
-	}
-	return $scripts;
+	if ($sortFiles)
+		usort($files, 'strnatcasecmp');
+	return $files;
 }
 
 function displayException(Exception $e) {
 	$clazz = get_class($e);
 	$msg   = $e->getMessage();
 	$trace = $e->getTraceAsString();
-	echo "<h1>The Exception ${clazz} was raised</h1>";
+	echo "<h1>${clazz} was raised</h1>";
 	echo "<h3>${msg}</h3>";
 	echo "<pre>${trace}</pre>";
 }
@@ -223,6 +197,15 @@ function durationStart() {
 	return microtime(true);
 }
 
-function duration($start) {
+function durationStop($start) {
 	return microtime(true) -  $start;
+}
+
+function cleanID($s) {
+	$lower = strtolower($s);
+	$clean = preg_replace('/[^a-z0-9]+/', '-', $lower);
+	$multi = preg_replace('/-+/',  '-', $clean);
+	$pre   = preg_replace('/^-+/', '', $multi);
+	$post  = preg_replace('/-+$/', '', $pre);
+	return $post;
 }

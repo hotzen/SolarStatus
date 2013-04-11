@@ -1,52 +1,109 @@
-// http://stackoverflow.com/questions/221294/how-do-you-get-a-timestamp-in-javascript
-// function timestamp() {
-	// return Math.round(
-		// ( (new Date()).getTime() - Date.UTC(1970,0,1) ) / 1000
-	// );
-// }
-
-if(typeof(console) === 'undefined') {
+if (typeof(console) === 'undefined') {
     var console = {}
-    var logger  = function() {};
-	console.log   = console.error   = console.info   = console.debug   = console.warn     = logger
-	console.trace = console.dir     = console.dirxml = console.group   = console.groupEnd = logger
-	console.time  = console.timeEnd = console.assert = console.profile                    = logger
+    var noLogger = function() {};
+	console.log   = console.error   = console.info   = console.debug   = console.warn     = noLogger
+	console.trace = console.dir     = console.dirxml = console.group   = console.groupEnd = noLogger
+	console.time  = console.timeEnd = console.assert = console.profile                    = noLogger
 }
 
-String.prototype.replaceEntities = function() {
-	return this.replace(/</g, "&lt;").replace(/>/g, "&gt;") // .replace(/"/g, "&quot;")
+if (!String.prototype.trim) {
+	String.prototype.trim = function() {
+		return this.replace(/^\s+/, "").replace(/\s+$/, "");
+	}
 }
 
-String.prototype.splitBlanks = function() {
-	return this.replace(/^\s+/, "").replace(/\s+$/, "").split(/\s+/) // trim, then split
+if (!String.prototype.splitWhitespace) {
+	String.prototype.splitWhitespace = function() {
+		return this.trim().split(/\s+/);
+	}
+}
+if (!String.prototype.splitBlanks) { // @deprecated(use splitWhitespace instead)
+	String.prototype.splitBlanks = String.prototype.splitWhitespace;
 }
 
-Array.prototype.last = function() {
-	return this[this.length - 1]
+if (!String.prototype.splitLines) {
+	String.prototype.splitLines = function() {
+		return this.split(/[\r\n|\r|\n]/);
+	}
 }
 
-function dateTimeXSD(ts) {
-	var DATE_SEP = "-";
-	var TIME_SEP = ":";
-	var comps = dateTimeStringComps(ts);
-	return comps.year  + DATE_SEP + comps.month + DATE_SEP + comps.days + "T" +
-	       comps.hours + TIME_SEP + comps.mins  + TIME_SEP + comps.secs + "Z" // TODO proper TimeZone
+if (!String.prototype.replaceEntities) {
+	String.prototype.replaceEntities = function() {
+		return this.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+	}
 }
 
-function dateTimeHuman(ts) {
-	//var DATE_SEP = ".";
-	//var TIME_SEP = ":";
-	
-	// var comps = dateTimeStringComps(ts);
+if (!Array.prototype.last) {
+	Array.prototype.last = function() {
+		return (this.length > 0) ? this[this.length - 1] : null;
+	}
+}
 
-	// return comps.year  + DATE_SEP + comps.month + DATE_SEP + comps.days + " " +
-	       // comps.hours + TIME_SEP + comps.mins  + TIME_SEP + comps.secs
-	
+function dump(x, s) {
+	var indent = indent || '';
+	var s = '';
+	if (x === null) {
+	  s = 'NULL';
+	} else if (Array.isArray(x)) {
+		s = '[';
+		for (var i=0; i<x.length; i++) {
+			s += dump(x[i], indent)
+			if (i < x.length-1) s += ', ';
+		}
+		s += ']';
+	} else switch(typeof x) {
+		case 'undefined':
+			s = 'UNDEFINED';
+			break;
+		case 'object':
+			s = "{ ";
+			var first = true;
+			for (var p in x) {
+				if (!first) s += indent + '  ';
+				s += p + ': ';
+				s += dump(x[p], indent + '  ');
+				s += "\n"
+				first = false;
+			}
+			s += '}';
+			break;
+		case 'function':
+			s = '<FUNCTION>';
+			break;
+		case 'boolean':
+			s = (x) ? 'TRUE' : 'FALSE';
+			break;
+		case 'string':
+			s = '"' + x + '"';
+			break;
+		case 'number':
+		default:
+			s += x;
+			break;
+	}
+	return s;
+}
+
+// simple 6-hexdigits unique'ish ID
+function uid() {
+	return (Math.floor(Math.random()*0x1000000)+1).toString(16);
+}
+
+function dateTimeXSD(ts, dateSep, timeSep) {
+	var dateSep = dateSep || "-";
+	var timeSep = timeSep || ":";
+	var props = dateTimePropsText(ts);
+	return props.year  + dateSep + props.month + dateSep + props.days + "T" +
+	       props.hours + timeSep + props.mins  + timeSep + props.secs + "Z" // TODO proper TimeZone, now just defaults to Zulu/UTC
+}
+
+function dateTimeText(ts, dateTimeSep) {
+	var dateTimeSep = dateTimeSep || " "
 	var d = new Date(ts)
-	return d.toLocaleDateString() + " - " + d.toLocaleTimeString()
+	return d.toLocaleDateString() + dateTimeSep + d.toLocaleTimeString()
 }
 
-function dateTimeComps(ts) {
+function dateTimeProps(ts) {
 	var d = new Date(ts)
 	return {
 		  year:  d.getFullYear()
@@ -58,22 +115,21 @@ function dateTimeComps(ts) {
 	}
 }
 
-function dateTimeStringComps(ts) {
-	var comps    = dateTimeComps(ts);
-	var strComps = {}
-	
-	for (var comp in comps) {
-		var v = new String( comps[comp]  );
+function dateTimePropsText(ts) {
+	var props = dateTimeProps(ts);
+	var formatted = {}
+	for (var p in props) {
+		var v = new String( props[p] );
 		if (v.length == 1)
 			v = "0" + v
-		strComps[comp] = v
+		formatted[p] = v
 	}
-	return strComps
+	return formatted;
 }
 
 var UNITS = {
 	order: ["K", "M", "G", "T", "P", "E", "Z"],
-	K: 3,
+	K: 3, // 10^3
 	M: 6,
 	G: 9,
 	T: 12,
@@ -93,42 +149,43 @@ function alignUnits(aNum, aUnit, bNum, bUnit) {
   
 	if (diff < 0) {
 		var factor = Math.pow(10, diff*-1)
-		return [aNum, bNum * factor, aUnit]
+		return [aNum, bNum * factor, aUnit];
 	} else if (diff > 0) {
 		var factor = Math.pow(10, diff)
-		return [aNum * factor, bNum, bUnit]
+		return [aNum * factor, bNum, bUnit];
 	} else {
-		return [aNum, bNum, aUnit]
+		return [aNum, bNum, aUnit];
 	}
 }
 
 function convertUnit(num, fromUnit, toUnit) {
 	if (!UNITS[fromUnit])
-		throw new Error("invalid unit '" + fromUnit + "'")
+		throw new Error("invalid unit '" + fromUnit + "'");
 	if (!UNITS[toUnit])
-		throw new Error("invalid unit '" + toUnit + "'")
+		throw new Error("invalid unit '" + toUnit + "'");
 
 	var diff = UNITS[fromUnit] - UNITS[toUnit]
 	var factor = Math.pow(10, diff)
-	return num * factor
+	return num * factor;
 }
 
 function greaterUnit(unit) {
 	for (var i=0; i<UNITS.order.length; i++)
 		if (UNITS.order[i] == unit)
-			return UNITS.order[i+1]
-	return unit
+			return UNITS.order[i+1];
+	return unit;
 }
 
+// TODO: make me cleaner!
 // [x, uUit] => [x', NewUnit]
 function convertToGreatestUnit(num, unit) {
 	if (!UNITS[unit])
-		throw new Error("invalid unit '" + unit + "'")
+		throw new Error("invalid unit '" + unit + "'");
 	while (num > 1000) {
 		var greater = greaterUnit(unit)
 		if (unit == greater) break
 		num = convertUnit(num, unit, greater)
 		unit = greater
 	}
-	return [num, unit]
+	return [num, unit];
 }

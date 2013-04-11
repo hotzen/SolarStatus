@@ -1,4 +1,4 @@
-function solar_transform_ps(elem, cmd, rc, out) {
+SolarStatus.view("ps", function(cmd, rc, out, createView, done) {
 	var tbl = new TableTransformer()
 
 	tbl.header("PID", "The decimal value of the process ID")
@@ -19,7 +19,7 @@ function solar_transform_ps(elem, cmd, rc, out) {
 	tbl.header("STIME", "The starting time or date of the process, printed with no blanks")
 	tbl.header("COMMAND",	"The name of the command being executed")
 
-	tbl.transform(data, elem)
-	
-	return "Table"
-}
+	var elem = tbl.create(out)
+	createView("Table", elem)
+	done()
+})

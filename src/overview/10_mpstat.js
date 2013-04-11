@@ -5,18 +5,14 @@
 //   0  899   0   46   311  108  115    3   26    4    0   641    1   2   0  97
 //   1  325   0    0   229   57  212    3   30    2    0   980    1   1   0  98
 // <EMPTY>
-function solar_overview_mpstat(rows) {
-	var numCores = (rows.length - 3) / 2
+SolarStatus.overview("mpstat", function(cmd, rc, lines, createOverview, done) {
+	var numCores = (lines.length - 3) / 2
 	var startIdx = numCores + 2
-	
-	//console.log(["solar_overview_mpstat", rows])
-	
-	var res = []
-	
+
 	for (c=0; c<numCores; c++) {
 		var coreNum  = c + 1
 		var coreIdx  = startIdx + c
-		var coreData = rows[coreIdx]
+		var coreData = lines[coreIdx]
 		
 		//console.log(["coreNum", coreNum, "coreIdx", coreIdx, "coreData", coreData])
 		
@@ -30,9 +26,9 @@ function solar_overview_mpstat(rows) {
 		
 		var $meter = $("<meter></meter>").attr("min", 0).attr("max", 100).attr("value", load)
 		$meter.attr("title", desc).text(desc)
-		$meter.css("background-color", "#00A67C").css("color", "#FF5F00")
+		//$meter.css("background-color", "#00A67C").css("color", "#FF5F00")
 
-		res.push([lbl, $meter])
+		createOverview(lbl, $meter)
 	}
-	return res
-}
+	done()
+})

@@ -1,5 +1,6 @@
-function solar_overview_svcs_x(rows) {
-	var out = rows.join("")
+SolarStatus.overview("svcs_x", function(cmd, rc, lines, createOverview, done) {
+//function solar_overview_svcs_x(rows) {
+	var out = lines.join("")
 	var $span;
 	
 	if (out.length == 0) {
@@ -11,5 +12,6 @@ function solar_overview_svcs_x(rows) {
 			css("padding", "2px")
 	}
 	
-	return [ ["Services", $span] ]
-}
+	createOverview("Services", $span)
+	done()
+})

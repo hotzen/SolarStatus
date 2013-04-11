@@ -1,12 +1,10 @@
-#!/usr/bin/php
 <?php
 function initSession() {
-	ini_set('session.save_path', sys_get_temp_dir());
-
 	ini_set('session.use_cookies', 1);
 	ini_set('session.use_only_cookies', 1);
 	ini_set('session.use_trans_sid', 0);
 	
+	session_cache_limiter('nocache');
 	session_name('SID');
 	session_set_cookie_params(0); // invalidate session-cookie on browser-close
 	session_start();
@@ -22,15 +20,15 @@ function updateSession() {
 }
 
 function requiresAuth() {
-	return (  isset($_SERVER['SOLAR_CONFIG']['AUTH'])
-		&& isset($_SERVER['SOLAR_CONFIG']['AUTH']['PASSWORD'])
-		&& strlen($_SERVER['SOLAR_CONFIG']['AUTH']['PASSWORD']) > 0);
+	return ( isset($_SERVER['SOLAR_CONFIG']['AUTH'])
+		  && isset($_SERVER['SOLAR_CONFIG']['AUTH']['PASSWORD'])
+		  && strlen($_SERVER['SOLAR_CONFIG']['AUTH']['PASSWORD']) > 0 );
 }
 
 function checkAuth() {
 	if (!requiresAuth())
 		return true;
-		
+
 	if (!isset($_SESSION['AUTH']) || !$_SESSION['AUTH'])
 		return false;
 	
@@ -68,11 +66,7 @@ function isLogin(&$retChallenge, &$retResponse) {
 
 function checkLogin($challenge, $response) {
 	$exp = generateExpectedResponse($challenge);
-	
-	if ($response != $exp)
-		return false;
-	
-	return true;
+	return ($response == $exp);
 }
 
 function doLogin() {
@@ -95,7 +89,7 @@ function doLogout() {
 function getLoginForm($header) {
 	$self      = $_SERVER['PHP_SELF'];
 	$challenge = generateChallenge();
-			
+	
 	$o = <<<EOC
 	<h1>${header}</h1>
 	<form id="auth" name="auth" action="${self}" method="GET">
@@ -108,82 +102,3 @@ EOC;
 	
 	return $o;
 }
-
-/*
-function login($challenge, $response, &$token) {
-	$exp = generateExpectedResponse($challenge);
-	
-	if ($response != $exp) {
-		$token = '';
-		return false;
-	}
-	
-	$token = generateToken();	
-	return true;
-}
-
-function isAuthorized(&$token = NULL) {
-			
-	// auth disabled
-	if (!requiresAuth())
-		return true;
-	
-	
-	// not passed, fetch from request
-	if (!isset($token) && isset($_REQUEST['t'])) {
-		$token = $_REQUEST['t'];
-	}
-	
-	// try passed token
-	if (isset($token)) {
-		$auth = checkToken($token);
-		
-		// generate new token
-		if ($auth) {
-			$token = generateToken();
-		}
-		
-		return $auth;
-	}
-	
-	// fail
-	$token = '';
-	return false;
-}
-
-function generateToken($time = NULL) {
-	if ($time === NULL)
-		$time = time();
-
-	$secret = $_SERVER['SOLAR_CONFIG']['AUTH']['SECRET'];
-	$time   = dechex( $time );
-	$ip     = $_SERVER['REMOTE_ADDR'];
-	$ua     = $_SERVER['HTTP_USER_AGENT'];
-	
-	return $time . '$' . sha1( $time . $ip . $ua . $secret );
-}
-
-function checkToken($t) {
-	if (!requiresAuth())
-		return true;
-	
-	$ps = explode('$', $t);
-	if (count($ps) != 2)
-		return false;
-	
-	// check expiration
-	$time   = hexdec($ps[0]);
-	$dur    = time() - $time;
-	$expire = (int)$_SERVER['SOLAR_CONFIG']['AUTH']['EXPIRE'];
-
-	if ($dur > $expire)
-		return false;
-		
-	return ($t == generateToken($time));
-}
-function reloadTokenized($t) {
-	//TODO: relative URLs work but are invalid HTTP
-	header("Location: ${_SERVER['PHP_SELF']}?t=${t}");
-	exit;
-}
-*/

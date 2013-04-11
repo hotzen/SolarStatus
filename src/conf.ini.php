@@ -20,8 +20,8 @@ timeout = 900
 ;   default    Use the filter by default, optional
 
 [filter-1]
-label    = "CPU, I/O, TOP"
-selector = "#mpstat, #zpool_iostat, #nicstat, #top"
+label    = "System Load"
+selector = "#mpstat, #zpool_iostat, #nicstat, #prstat"
 
 [filter-2]
 label    = "Health"
@@ -60,7 +60,7 @@ label    = "Logs"
 selector = ".probe-logs"
 
 [filter-80]
-label    = "System / Hardware"
+label    = "Hardware"
 selector = ".probe-sys"
 
 [filter-90]
@@ -90,17 +90,6 @@ selector = ".probe"
 ;   webservd ALL=NOPASSWD:/path/to/smartctl
 ; this allows webservd-user to execute smartcl without password-auth using root-privileges
 smartctl = "sudo /path/to/smartctl"
-
-
-; script that checks whether all passed disks are currently spinning RC=0 or not RC<>0.
-; this allows to chain the script with the "&&" operator and another operator that is supposed 
-; to work only if disks are spinning (nowakeup)
-;
-; that only continues execution of the next command
-; if the previous command returned 0.
-;
-; if using this script, please have a look and edit paths according to your system
-nowakeup = "/var/htdocs/status/scripts/nowakeup.sh %DEVSET-1!"
 
 
 ;##############################################################################
@@ -222,18 +211,14 @@ order  = 32
 [probe-zfs]
 label  = "ZFS Filesystems"
 class  = probe-zfs
-;                                   you may add "keystatus" for encrypted solaris filesystems
 cmd    = "zfs list -t filesystem -o name,used,avail,mountpoint,sharesmb,sharenfs,compression,compressratio,dedup,quota,sync,atime,aclinherit"
-; see macro NOWAKEUP: activate if you don't want your disks to wake up:
-;cmd    = "%NOWAKEUP && zfs list -t filesystem -o name,used,avail,mountpoint,sharesmb,sharenfs,compression,compressratio,dedup,quota,sync,atime,aclinherit"
+;        you may add "keystatus" for encrypted solaris filesystems
 order  = 33
 
 [probe-zfs_snaps]
 label  = "ZFS Snapshots"
 class  = probe-zfs
 cmd    = "zfs list -t snapshot"
-; see macro NOWAKEUP: activate if you don't want your disks to wake up:
-;cmd    = "%NOWAKEUP && zfs list -t snapshot"
 order  = 34
 
 ; https://github.com/mharsch/arcstat

@@ -1,4 +1,4 @@
-function solar_transform_zfs(elem, cmd, rc, out) {
+SolarStatus.view("zfs", function(cmd, rc, out, createView, done) {
 	var tbl = new TableTransformer()
 	
 	// http://docs.oracle.com/cd/E19963-01/html/821-1448/gazss.html#gcfgr
@@ -66,7 +66,7 @@ function solar_transform_zfs(elem, cmd, rc, out) {
 	tbl.header("zoned", "Indicates whether a dataset has been added to a non-global zone. If this property is set, then the mount point is not honored in the global zone, and ZFS cannot mount such a file system when requested. When a zone is first installed, this property is set for any added file systems.")
 	tbl.header("xattr", "Indicates whether extended attributes are enabled (on) or disabled (off) for this file system.")
 
-	tbl.create(out, elem)
-	
-	return "Table"
-}
+	var elem = tbl.create(out)
+	createView("Table", elem)
+	done()
+})

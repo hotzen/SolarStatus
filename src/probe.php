@@ -3,27 +3,29 @@ require 'lib/conf.php';
 require 'lib/auth.php';
 require 'lib/solstat.php';
 
+set_time_limit(60);
+
 initSession();
 header('Content-Type: text/javascript');
 
 try {
 	loadConfig();
 } catch (Exception $e) {
-	jsonError( 'NO_CONFIG' );
+	jsonError('NO_CONFIG', 'configuration file conf.ini.php is not readable or contains invalid content');
 }
 
 if (!checkAuth()) {
-	jsonError( 'NO_AUTH' );
+	jsonError('NO_AUTH', 'You are not authenticated');
 }
 
 if (!isset($_GET['p'])) {
-	jsonError( 'NO_PROBE' );
+	jsonError('NO_PROBE', 'No probe was specified');
 }
 
 $probeID = strtolower($_GET['p']);
 
 if (!isset($_SERVER['SOLAR_CONFIG']['PROBES'][$probeID])) {
-	jsonError( "INVALID_PROBE:${probeID}" );
+	jsonError('INVALID_PROBE', 'The specified probe is invalid');
 }
 
 updateSession();

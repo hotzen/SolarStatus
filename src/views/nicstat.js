@@ -1,4 +1,4 @@
-// function solar_transform_nicstat(elem, cmd, rc, out) {
+SolarStatus.view("nicstat", function(cmd, rc, out, createView, done) {
 	var tbl = new TableTransformer()
 		
 	tbl.header("Time", "Time")
@@ -12,7 +12,7 @@
 	tbl.header("%Util", "%Utilisation (r+w/ifspeed)")
 	tbl.header("Sat", "Saturation (defer, nocanput, norecvbuf, noxmtbuf)")
 	
-	tbl.create(out, elem)
-	
-	return "Table"
-}
+	var elem = tbl.create(out)
+	createView("Table", elem)
+	done()
+})

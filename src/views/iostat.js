@@ -1,5 +1,5 @@
 // http://download.oracle.com/docs/cd/E19963-01/html/821-1462/iostat-1m.html
-function solar_transform_iostat(elem, cmd, rc, out) {
+SolarStatus.view("iostat", function(cmd, rc, out, createView, done) {
 	var tbl = new TableTransformer()
 
 	tbl.ignore("extended device statistics")
@@ -23,7 +23,7 @@ function solar_transform_iostat(elem, cmd, rc, out) {
 	
 	tbl.header("wt", "the I/O wait time is no longer calculated as a percentage of CPU time, and this statistic will always return zero")
 
-	tbl.create(out, elem)
-	
-	return "Table"
-}
+	var elem = tbl.create(out)
+	createView("Table", elem)
+	done()
+})

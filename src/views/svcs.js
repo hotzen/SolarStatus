@@ -1,4 +1,4 @@
-function solar_transform_svcs(elem, cmd, rc, out) {
+SolarStatus.view("svcs", function(cmd, rc, out, createView, done) {
 	var tbl = new TableTransformer()
 
 	tbl.header("STATE",	"The state of the service instance")
@@ -7,7 +7,7 @@ function solar_transform_svcs(elem, cmd, rc, out) {
 						"Otherwise, this column indicates the date on which it did so")
 	tbl.header("FMRI", "fault management resource identifier")
 	
-	tbl.create(out, elem)
-	
-	return "Table"
-}
+	var elem = tbl.create(out)
+	createView("Table", elem)
+	done()
+})

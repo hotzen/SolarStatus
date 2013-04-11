@@ -1,4 +1,4 @@
-function solar_transform_prstat(elem, cmd, rc, out) {
+SolarStatus.view("prstat", function(cmd, rc, out, createView, done) {
 	var tbl = new TableTransformer()
 
 	tbl.header("PID", "The process ID of the process")
@@ -27,7 +27,7 @@ function solar_transform_prstat(elem, cmd, rc, out) {
 	
 	tbl.footer("Total:")
 	
-	tbl.create(out, elem)
-	
-	return "Table"
-}
+	var elem = tbl.create(out)
+	createView("Table", elem)
+	done()
+})

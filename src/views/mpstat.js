@@ -1,5 +1,5 @@
 // http://download.oracle.com/docs/cd/E19963-01/html/821-1462/mpstat-1m.html
-function solar_transform_mpstat(elem, cmd, rc, out) {
+SolarStatus.view("mpstat", function(cmd, rc, out, createView, done) {
 	var tbl = new TableTransformer()
 
 	tbl.header("CPU", "processor ID")
@@ -22,7 +22,7 @@ function solar_transform_mpstat(elem, cmd, rc, out) {
 	tbl.header("sze", "number of processors in the requested processor set")
 	tbl.header("set", "processor set membership of each CPU")
 
-	tbl.create(out, elem)
-	
-	return "Table"
-}
+	var elem = tbl.create(out)
+	createView("Table", elem)
+	done()
+})

@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 function loadConfig() {
 	$file = './conf.ini.php';
