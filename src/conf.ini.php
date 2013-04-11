@@ -1,4 +1,3 @@
-#!/usr/bin/php
 ; <?php exit; __halt_compiler(); ?>
 dir_scripts = ./scripts
 
@@ -93,38 +92,63 @@ selector = ".probe"
 smartctl = "sudo /path/to/smartctl"
 
 
+; script that checks whether all passed disks are currently spinning RC=0 or not RC<>0.
+; this allows to chain the script with the "&&" operator and another operator that is supposed 
+; to work only if disks are spinning (nowakeup)
+;
+; that only continues execution of the next command
+; if the previous command returned 0.
+;
+; if using this script, please have a look and edit paths according to your system
+nowakeup = "/var/htdocs/status/scripts/nowakeup.sh %DEVSET-1!"
+
 
 ;##############################################################################
 ; DEVICE-SETS, where each set contains N devices.
 ; A device-set can be used in commands by using the macro %DEVSET-<NUM> which gets expanded to the set's devices.
 ;
-; A command using a device-sets with N devices, is expanded into N individual commands,
-; each using one device of the device-set.
+; A command using a device-set with N devices, is expanded into N individual commands where each each command uses one device of the device-set.
 ; So a command using a device-set with 3 devices is expanded to 3 individual commands with 3 different results.
 ;
-; Example: If %DEVSET-11 contains 3 devices, a command using this devset is expanded to 3 individual commands,
-; 		   where each command uses one of those 3 devices
-;		   Directive:	[devset-11]
-;						dev[] = <dev-1>
-;						dev[] = <dev-2>
-;						dev[] = <dev-3>
-;		   Command:		echo %DEVSET-11
-;		   Expanded:	echo <dev-1>, echo <dev-2>, echo <dev-3>
-;						(3 independent commands are executed in sequence)
-
+; Example: %DEVSET-1 contains 3 devices:
+;   [devset-1]
+;   dev[] = /dev/rdsk/1
+;   dev[] = /dev/rdsk/2
+;   dev[] = /dev/rdsk/3
+;
+; Command using this device-set:
+;   [probe-example]
+;   cmd = "echo %DEVSET-1"
+;
+; The device-set gets expanded into the 3 devices and 3 individual commands are executed:
+;   Command:  "echo test %DEVSET-1"
+;
+;   Expanded: "echo test /dev/rdsk/1",
+;             "echo test /dev/rdsk/2",
+;             "echo test /dev/rdsk/3"
+;
+;   Result:   "test /dev/rdsk/1",
+;             "test /dev/rdsk/2",
+;             "test /dev/rdsk/3"
+;
+; If using "!" after the devset, the devset is *not* expanded into individual commands,
+; instead it is expanded into a list of all devices, separated by the configuration directive DEVSET_SEP
+;   Command:  "echo test %DEVSET-1!"
+;   Expanded: "echo test /dev/rdsk/1 /dev/rdsk/2 /dev/rdsk/3",
+;   Result:   "test /dev/rdsk/1 /dev/rdsk/2 /dev/rdsk/3"
 
 ;*****************************
 ; device-set #0: OS
 [devset-0]
-dev[] = /dev/rdsk/c8t0d0s0
+dev[] = /dev/rdsk/editme-c0t0d0s0
 
 
 ;*****************************
 ; device-set #1: Storage
 [devset-1]
-dev[] = /dev/rdsk/c8t1d0
-dev[] = /dev/rdsk/c8t2d0
-dev[] = /dev/rdsk/c8t3d0
+dev[] = /dev/rdsk/editme-c1t0d0
+dev[] = /dev/rdsk/editme-c1t1d0
+dev[] = /dev/rdsk/editme-c1t2d0
 
 
 
@@ -198,13 +222,18 @@ order  = 32
 [probe-zfs]
 label  = "ZFS Filesystems"
 class  = probe-zfs
-cmd    = "zfs list -t fs -o name,used,avail,mountpoint,sharesmb,sharenfs,keystatus"
+;                                   you may add "keystatus" for encrypted solaris filesystems
+cmd    = "zfs list -t filesystem -o name,used,avail,mountpoint,sharesmb,sharenfs,compression,compressratio,dedup,quota,sync,atime,aclinherit"
+; see macro NOWAKEUP: activate if you don't want your disks to wake up:
+;cmd    = "%NOWAKEUP && zfs list -t filesystem -o name,used,avail,mountpoint,sharesmb,sharenfs,compression,compressratio,dedup,quota,sync,atime,aclinherit"
 order  = 33
 
 [probe-zfs_snaps]
 label  = "ZFS Snapshots"
 class  = probe-zfs
 cmd    = "zfs list -t snapshot"
+; see macro NOWAKEUP: activate if you don't want your disks to wake up:
+;cmd    = "%NOWAKEUP && zfs list -t snapshot"
 order  = 34
 
 ; https://github.com/mharsch/arcstat
@@ -223,15 +252,21 @@ class  = probe-zfs-adv
 cmd    = "/opt/arc_summary.pl"
 order  = 36
 
-; http://www.richardelling.com/Home/scripts-and-programs-1/zilstat
-; DTrace requires additional privileges, so use:
-; usermod -K defaultpriv=basic,dtrace_user,dtrace_proc,dtrace_kernel webservd
-; to give webservd full read-only kernel-access
+; website: http://www.richardelling.com/Home/scripts-and-programs-1/zilstat
+; source: https://github.com/richardelling/tools/blob/master/zilstat
+;
+; DTrace requires additional privileges:
+;   usermod -K defaultpriv=basic,dtrace_user,dtrace_proc,dtrace_kernel webservd
 ; Thanks to ChrisBenn http://hardforum.com/showpost.php?p=1037874906&postcount=23
+;
+; You may alternatively give webservd sudo-rights to run zilstat:
+; create a file /etc/sudoers.d/webservd or line into /etc/sudoers:
+;   webservd ALL=NOPASSWD:/opt/zilstat
+;
 ;[probe-zfs_zil_stat]
 ;label  = "ZFS ZIL Stat"
 ;class  = probe-zfs-adv
-;cmd    = "/opt/zilstat.ksh -M -t 1 3"
+;cmd    = "sudo /opt/zilstat -M -t 1 3"
 ;order  = 37
 
 
@@ -401,7 +436,7 @@ order   = 83
 confirm = "SMART commands will wake-up your disks!"
 
 [probe-smart_attr]
-label   = "HDD SMART Attributes (<a href='http://sourceforge.net/apps/trac/smartmontools/wiki/Howto_ReadSmartctlReports_ATA' target='_blank'>HowTo</a>)"
+label   = "HDD SMART Attributes (<a href='http://sourceforge.net/apps/trac/smartmontools/wiki/Howto_ReadSmartctlReports_ATA' target='_blank'>HowTo Read</a>)"
 class   = probe-smart
 cmd     = "%SMARTCTL --attributes -d sat,12 %DEVSET-1"
 order   = 84
