@@ -1,5 +1,5 @@
 $(document).ready(function() {
-	$("#auth").submit(function() {
+	$("form[name=auth]").submit(function() {
 		var $form = $(this);
 		
 		// append hash

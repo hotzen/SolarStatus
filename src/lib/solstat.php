@@ -1,5 +1,5 @@
 <?php
-class SolarExecException extends Exception {
+class InvalidCommandException extends Exception {
 	var $cmd;
 	
 	public function __construct($message, $cmd) {
@@ -18,7 +18,7 @@ function execCommand($cmd, &$rc = NULL) {
 	
 	$h = popen("${cmd} 2>&1", 'r');
 	if (!is_resource($h))
-		throw new SolarExecException("Could not open Process", $cmd);
+		throw new InvalidCommandException("could not create process", $cmd);
 	
 	$out = '';
 	do {
@@ -79,38 +79,31 @@ function expandCommand($cmd) {
 		$macros = array();
 	}
 
-	$cmdVarExp = expandVars($cmd, $macros);
-	$cmdsDevSetExp = expandDevSets( $cmdVarExp );
+	$exp1 = expandVars($cmd, $macros);
+	$exp2 = expandDevsets( $exp1 );
 
-	return $cmdsDevSetExp;
+	return $exp2;
 }
 
-function expandDevSets($cmdIn) {
-	$cmdsWork = array($cmdIn);
-	$cmdsDone = array();
-	
+define('EXPAND_LIMIT', 1000);
+
+function expandDevsets($cmdIn) {
 	$devsets = $_SERVER['SOLAR_CONFIG']['DEVSETS'];
-	
-	if (isset($_SERVER['SOLAR_CONFIG']['DEVSET_SEP']))
-		$sep = $_SERVER['SOLAR_CONFIG']['DEVSET_SEP'];
-	else
-		$sep = " ";
+
+	$cmdsWork = array( $cmdIn );
+	$cmdsDone = array();
 
 	while (($cmd = array_shift($cmdsWork)) !== NULL) {
-		
-		if (($devsetID = extractDevSetID($cmd, $complete)) !== NULL) {
+		if (++$counter > EXPAND_LIMIT)
+			throw new InvalidCommandException("failed to expand, trapped in infinite loop?", $cmdIn);
+
+		if (($devsetID = extractDevsetID($cmd)) !== NULL) {
 			if (!isset($devsets[$devsetID]))
-				throw new Exception("invalid devset '${devsetID}' used in cmd '${cmdIn}'");
+				throw new InvalidCommandException("invalid devset '${devsetID}' used", $cmdIn);
 			
 			$devset = $devsets[$devsetID];
-			
-			if ($complete) {
-				$allDevs = implode($sep, $devset);
-				$cmdsWork[] = expandDevSetID($cmd, $devsetID, $allDevs, "!");
-			} else {
-				foreach ($devset as $dev) {
-					$cmdsWork[] = expandDevSetID($cmd, $devsetID, $dev);
-				}
+			foreach ($devset as $dev) {
+				$cmdsWork[] = expandDevsetID($cmd, $devsetID, $dev);
 			}
 		} else {
 			$cmdsDone[] = $cmd;
@@ -119,18 +112,16 @@ function expandDevSets($cmdIn) {
 	return $cmdsDone;
 }
 
-function extractDevSetID($cmd, &$complete = false) {
-	if (!preg_match('/%DEVSET\-(\d+)(!?)/', $cmd, $matches))
+function extractDevsetID($cmd) {
+	if (!preg_match('/%DEVSET\-(\d+)/', $cmd, $matches))
 		return NULL;
 	
 	$id = $matches[1];
-	$complete = isset($matches[2]);
-	
 	return $id;
 }
 
-function expandDevSetID($cmd, $devSetID, $val, $suffix = "") {
-	$var = "%DEVSET-${devSetID}${suffix}";
+function expandDevsetID($cmd, $devsetID, $val) {
+	$var = "%DEVSET-${devsetID}";
 	return expandVars($cmd, array($var => $val));
 }
 
@@ -191,6 +182,16 @@ function jsonError($code, $msg = "", $details = array()) {
 	ob_end_clean();
 	echo json_encode( $err );
 	exit;
+}
+
+function jsonDebug($label, $x) {
+	echo "/* ${label}:\n";
+	var_dump($x);
+	echo "*/\n";
+	
+	ob_end_flush(); 
+    ob_flush(); 
+    flush(); 
 }
 
 function durationStart() {

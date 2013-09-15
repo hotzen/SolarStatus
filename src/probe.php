@@ -3,7 +3,8 @@ require 'lib/conf.php';
 require 'lib/auth.php';
 require 'lib/solstat.php';
 
-set_time_limit(60);
+ignore_user_abort( 0 );
+set_time_limit( $_SERVER['SOLAR_CONFIG']['PROBE_TIMEOUT'] );
 
 initSession();
 header('Content-Type: text/javascript');
@@ -15,22 +16,26 @@ try {
 }
 
 if (!checkAuth()) {
-	jsonError('NO_AUTH', 'You are not authenticated');
+	jsonError('NO_AUTH', 'no authentication');
 }
 
 if (!isset($_GET['p'])) {
-	jsonError('NO_PROBE', 'No probe was specified');
+	jsonError('NO_PROBE', 'no probe specified');
 }
 
 $probeID = strtolower($_GET['p']);
 
 if (!isset($_SERVER['SOLAR_CONFIG']['PROBES'][$probeID])) {
-	jsonError('INVALID_PROBE', 'The specified probe is invalid');
+	jsonError('INVALID_PROBE', 'invalid probe specified');
 }
 
 updateSession();
 
+
+$DEBUG = isset($_REQUEST['debug']);
+
 $probeConf = $_SERVER['SOLAR_CONFIG']['PROBES'][$probeID];
+if ($DEBUG) jsonDebug("PROBE-CONF", $probeConf);
 
 try {
 	$start = durationStart();
@@ -47,6 +52,8 @@ try {
 	if (isset($probeConf['SCRIPT'])) {
 		$script = $probeConf['SCRIPT'];
 		$cmd    = getScriptCmd($script);
+		if ($DEBUG) jsonDebug("SCRIPT-COMMAND", $cmd);
+
 		$rc     = -1;
 		$output = execScript($script, $rc);
 		
@@ -59,7 +66,8 @@ try {
 	// COMMAND
 	elseif (isset($probeConf['CMD'])) {
 		$cmds = expandCommand( $probeConf['CMD'] );
-		
+		if ($DEBUG) jsonDebug("EXPANDED COMMAND", $cmds);
+
 		foreach ($cmds as $cmd) {
 			$rc = -1;
 			$output = execCommand($cmd, $rc);
@@ -72,10 +80,10 @@ try {
 	
 	// ERROR
 	else {
-		jsonError('CONF', "Invalid Probe-Config", array('probe' => $probeID));
+		jsonError('CONF', "invalid probe-config", array('probe' => $probeID));
 	}
 		
-} catch (SolarExecException $e) {
+} catch (InvalidCommandException $e) {
 	$details = array(
 		  'probe' => $probeID
 		, 'cmd'   => $e->cmd

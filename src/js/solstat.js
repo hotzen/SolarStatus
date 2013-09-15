@@ -53,29 +53,22 @@ function repositionContent() {
 }
 
 function registerSettings() {
-	$ul = $("#settings").children("ul")
+	$ul = $("#menu").children("ul")
 	
-	$("#settings").hoverIntent({
-		over:    over,
-		out:     out,
+	$("#menu").hoverIntent({
+		over: show,
+		out:  hide,
 		timeout: 200
 	})
 	
-	function over() {
-		$ul.animate({ width: 'show' }, 100, "swing", over2)
+	function show() {
+		$ul.slideDown("fast") //animate({width: 'toggle'}, 300);
 	}
-	function over2() {
-		$ul.animate({ height: 'show' }, 300)
+	function hide() {
+		$ul.slideUp("slow") // animate({width: 'toggle'}, 300);
 	}
 	
-	function out() {
-		$ul.animate({ width: 'hide' }, 100, "swing", out2)
-	}
-	function out2() {
-		$ul.animate({ height: 'hide' }, 300)
-	}
-
-	$("#settings").click(function(evt) {
+	$("#menu").click(function(evt) {
 		evt.stopPropagation()
 	})
 }
@@ -342,7 +335,7 @@ function refreshProbe($probe, force) {
 		// store time in <time>
 		var ts = parseInt(data["time"])
 		$probe.find("footer time")
-			.data("timestamp", ts)
+			.attr("data-timestamp", ts)
 			.attr("datetime", dateTimeXSD(ts))
 			.text( dateTimeText(ts) );
 		

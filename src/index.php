@@ -65,7 +65,7 @@ $password = $challenge = $response = NULL;
 if (isLogout()) {
 	doLogout();
 	
-	echo getLoginForm("Logout successful, please login");
+	echo getLoginForm("Logout successful.");
 	echo "</body></html>";
 	exit;
 }
@@ -77,7 +77,7 @@ if (isLogin($challenge, $response)) {
 		header("Location: ${_SERVER['PHP_SELF']}");
 		exit;
 	} else {
-		echo getLoginForm("Login failed, please retry");
+		echo getLoginForm("Login failed.");
 		echo "</body></html>";
 		exit;
 	}
@@ -117,7 +117,7 @@ EOC;
 		}
 		?>
 		
-		<li id="settings">
+		<li id="menu">
 			<ul>
 				<li id="probe-auto-refresh">
 					<label><input id="probe-refresh-toggle" type="checkbox" name="probe_refresh_toggle" value="1" /> Auto refresh</label>
@@ -176,6 +176,7 @@ EOC;
 			</ul>
 			<a href="#refresh" class="refresh" title="Refresh"></a>
 			<div class="failure hide"></div>
+			<!-- TODO <a href="#minimize" class="minimize" title="Minimize Output"></a> -->
 			<a href="#fullsize" class="fullsize" title="View fullsize without scrollbars"></a>
 			<a href="#select" class="select" title="Select Output"></a>
 		</header>

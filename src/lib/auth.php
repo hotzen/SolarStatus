@@ -45,7 +45,8 @@ function checkAuth() {
 }
 
 function generateChallenge() {
-	return sha1( uniqid('', true) );
+	$prefix = '';
+	return sha1( uniqid($prefix, true) );
 }
 
 function generateExpectedResponse($challenge) {
@@ -91,13 +92,15 @@ function getLoginForm($header) {
 	$challenge = generateChallenge();
 	
 	$o = <<<EOC
+<div class="auth">
 	<h1>${header}</h1>
-	<form id="auth" name="auth" action="${self}" method="GET">
+	<form name="auth" action="${self}" method="GET">
 		<input name="c" type="hidden" value="${challenge}" />
 		<input name="r" type="hidden" value="" />
 		<input name="p" type="password" value="" autofocus="autofocus" />
-		<input name="auth" type="submit" value="login" />
+		<input name="auth" type="submit" value="Login" />
 	</form>
+</div>
 EOC;
 	
 	return $o;

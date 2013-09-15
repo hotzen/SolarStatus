@@ -1,6 +1,9 @@
 ; <?php exit; __halt_compiler(); ?>
 dir_scripts = ./scripts
 
+; time in seconds after which probes are aborted if not yet finished
+probe_timeout = 60
+
 ;##############################################################################
 ; AUTHENTICATION - comment out to disable
 [auth]

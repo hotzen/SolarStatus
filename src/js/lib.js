@@ -94,7 +94,7 @@ function dateTimeXSD(ts, dateSep, timeSep) {
 	var timeSep = timeSep || ":";
 	var props = dateTimePropsText(ts);
 	return props.year  + dateSep + props.month + dateSep + props.days + "T" +
-	       props.hours + timeSep + props.mins  + timeSep + props.secs + "Z" // TODO proper TimeZone, now just defaults to Zulu/UTC
+	       props.hours + timeSep + props.mins  + timeSep + props.secs;
 }
 
 function dateTimeText(ts, dateTimeSep) {

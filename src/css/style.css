@@ -1,6 +1,8 @@
 body {
-	/* background-color: #F7F7F7; */
 	background: url(../img/bg.png) repeat 0 0;
+	margin: 0;
+	padding: 0;
+	font-size: 100%;
 }
 
 img {
@@ -25,9 +27,36 @@ meter {
 	padding: 3px;
 }
 
+.auth {
+	padding: 2em;
+	margin: 0;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 10em;
+	width: 20em;
+	border: 4px solid #72869A;
+	border-radius: 20px;
+}
+
+.auth h1 {
+	/* border-bottom: 2px solid #72869A; */
+}
+
+.auth input[name=p] {
+	font-size: 1.2em;
+	border: 1px solid #72869A;
+	width: 12em;
+}
+
+.auth input[type=submit] {
+	font-size: 1.2em;
+	border: 1px solid #8EA7C0;
+	width: 4em;
+}
+
 li, label, a, header, footer, h1, th, time, td, th {
-	font-family: Tahoma, Geneva, sans-serif;
-	color: black
+	font-family: Helvetica, Tahoma, Geneva, sans-serif;
+	color: black;
 }
 
 nav#panel {
@@ -81,18 +110,18 @@ ul#filters > li.selected > a {
 	border-bottom: 1px solid white;
 }
 
-li#settings {
+li#menu {
 	position: absolute;
 	top: 0;
 	right: 0;
 	min-width: 22px;
 	min-height: 22px;
-	background: url(../img/settings.png) no-repeat top right;
+	background: url(../img/menu.png) no-repeat top right;
 	vertical-align: top;
 	cursor: pointer;
 }
 
-#settings > ul {
+#menu > ul {
 	display: none;
 	border: 1px solid #72869A;
 	border-radius: 2px;
@@ -104,22 +133,22 @@ li#settings {
 	background-color: #8EA7C0;
 }
 
-#settings > ul > li {
+#menu > ul > li {
 	font-size: 0.9em;
 	padding-left: 1em;
 	padding-right: 1em;
 	padding-bottom: 0.5em;
 }
 
-#settings > ul > li * {
+#menu > ul > li * {
 	color: #F0F0F0;
 }
 
-#settings a {
+#menu a {
 	text-decoration: none;
 }
 
-#settings a:hover {
+#menu a:hover {
 	text-decoration: underline;
 }
 
@@ -153,10 +182,10 @@ li#settings {
 }
 
 #overview {
-	border: 1px solid #CCC;
+	border: 2px solid #CCC;
 	margin: 5px;
 	padding: 5px;
-	border-radius: 3px;
+	border-radius: 5px;
 	min-height: 5em;
 }
 
@@ -177,7 +206,7 @@ li#settings {
 	padding-right: 2em;
 	text-align: right;
 	vertical-align: top;
-	min-width: 15em;
+	min-width: 10em;
 }
 
 #overview td.view {
@@ -214,7 +243,6 @@ li#settings {
 }
 
 .probe header {
-	font-family: Tahoma, Geneva, sans-serif;
 	font-size: 1em;
 	padding: 2px;
 	border-bottom: 1px solid #CCC;
@@ -285,7 +313,7 @@ li#settings {
 	opacity:0.5;
 }
 
-.probe header .full:hover {
+.probe header .fullsize:hover {
 	opacity:1;
 }
 
