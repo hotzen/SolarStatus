@@ -21,7 +21,7 @@ TableTransformer.prototype = {
 	
 	
 	/**
-	 * defines a header-column, detected by <string>
+	 * defines a header-column, detected by <pattern>
 	 * <info> is shown as the html title-attribute to display informational text
 	 * optional zero-based <index>, data is only detected as a header when the <index> specification matches the data 
 	 * optional <label>, that overwrites what is displayed if the column is detected as a header.
@@ -46,7 +46,7 @@ TableTransformer.prototype = {
 		// TODO
 	},
 	isIgnore: function(data) {
-		var	packed = this.pack(data)
+		var packed = this.pack(data)
 
 		for (var i=0; i<this.ignoreDefs.length; ++i) {
 			if (data.indexOf(this.ignoreDefs[i].pattern) > -1)

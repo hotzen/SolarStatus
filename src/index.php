@@ -9,10 +9,14 @@ initSession();
 <html>
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<!--
+	  http://www.chromium.org/developers/how-tos/chrome-frame-getting-started
+	  http://stackoverflow.com/questions/6771258/whats-the-difference-if-meta-http-equiv-x-ua-compatible-content-ie-edge-e
+	-->
 	
-	<title>SolarStatus 0.9</title>
+	<title>SolarStatus 0.10</title>
 	
-	<link href="css/style.css" rel="stylesheet" type="text/css"></link>
+	<link href="style.css" rel="stylesheet" type="text/css"></link>
 	<script src="js/lib.js" type="text/javascript"></script>
 	<script src="js/jquery.js" type="text/javascript"></script>
 	<script src="js/jquery.sha1.js" type="text/javascript"></script>
@@ -92,6 +96,40 @@ if (!checkAuth()) {
 	exit;
 }
 updateSession();
+
+// ##############################################
+// execute menu commands
+foreach ($_REQUEST as $key => $val) {
+	if (isset($_SERVER['SOLAR_CONFIG']['MENU'][$key]) && $val == 1) {
+		$label   = ucfirst(strtolower( $key ));
+		$command = $_SERVER['SOLAR_CONFIG']['MENU'][$key];
+
+		echo <<<EOC
+		<div class="menu-command">
+			<h2>${label}</h2>
+			<p>
+				<label>executing <code>${command}</code> ...</label>
+			</p>
+EOC;
+		try {
+			$rc = NULL;
+			$res = execCommand($command, $rc);
+			
+			if ($rc == 0)
+				$label = "command completed successfully:";
+			else
+				$label = "command failed:";
+			
+			echo "<p><label>${label}</label></p>";
+			echo "<pre>${res}</pre>";
+			
+		} catch (InvalidCommandException $e) {
+			displayException($e);
+		}
+		echo "</div></body></html>";
+		exit;
+	}
+}
 ?>
 <nav id="panel">
 	<ul id="filters">
@@ -123,6 +161,16 @@ EOC;
 					<label><input id="probe-refresh-toggle" type="checkbox" name="probe_refresh_toggle" value="1" /> Auto refresh</label>
 					<label> every <input id="probe-refresh-freq" type="number" name="probe_refresh_freq" min="1" value="3" /> seconds</label>
 				</li>
+				<?php
+				$menuEntries = $_SERVER['SOLAR_CONFIG']['MENU'];
+				foreach ($menuEntries as $id => $command) {
+					$label = ucfirst(strtolower( $id ));
+					
+					echo <<<EOC
+				<li><a href="?${id}=1" title="${label}">${label}</a></li>
+EOC;
+				}
+				?>
 				<li id="logout">
 					<a href="?logout=1">Logout</a>
 				</li>

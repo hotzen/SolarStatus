@@ -14,6 +14,22 @@ timeout = 900
 
 
 ;##############################################################################
+; MENU - top right corner
+; comment out directives to disable
+; 
+; for sudo-commands, create a file /etc/sudoers.d/<program> or a new line into /etc/sudoers:
+;   webservd ALL=NOPASSWD:</PATH/TO/PROGRAM>
+; this allows webservd-user to execute <PROGRAM> without password-auth using root-privileges
+
+[menu]
+; http://docs.oracle.com/cd/E23823_01/html/816-5166/shutdown-1m.html
+shutdown = "sudo shutdown -y -g3 -i5"
+restart = "sudo shutdown -y -g3 -i6"
+
+
+
+
+;##############################################################################
 ; FILTERS, that control which probes (actually HTML-Elements) are displayed.
 ;          The filter's number donates its order in the sequence of filters
 ;
@@ -99,7 +115,7 @@ smartctl = "sudo /path/to/smartctl"
 ; DEVICE-SETS, where each set contains N devices.
 ; A device-set can be used in commands by using the macro %DEVSET-<NUM> which gets expanded to the set's devices.
 ;
-; A command using a device-set with N devices, is expanded into N individual commands where each each command uses one device of the device-set.
+; A command using a device-set with N devices, is expanded into N individual commands where each command uses one device of the device-set.
 ; So a command using a device-set with 3 devices is expanded to 3 individual commands with 3 different results.
 ;
 ; Example: %DEVSET-1 contains 3 devices:
@@ -122,12 +138,6 @@ smartctl = "sudo /path/to/smartctl"
 ;   Result:   "test /dev/rdsk/1",
 ;             "test /dev/rdsk/2",
 ;             "test /dev/rdsk/3"
-;
-; If using "!" after the devset, the devset is *not* expanded into individual commands,
-; instead it is expanded into a list of all devices, separated by the configuration directive DEVSET_SEP
-;   Command:  "echo test %DEVSET-1!"
-;   Expanded: "echo test /dev/rdsk/1 /dev/rdsk/2 /dev/rdsk/3",
-;   Result:   "test /dev/rdsk/1 /dev/rdsk/2 /dev/rdsk/3"
 
 ;*****************************
 ; device-set #0: OS
@@ -146,15 +156,15 @@ dev[] = /dev/rdsk/editme-c1t2d0
 
 ;##############################################################################
 ; PROBES, each probe is a listing that displays either
-;         the output of a script or of an configured command
+;         the output of a script or the output of a command/program
 ;
 ; the following directives can be used:
 ;  label	The label of the probe, required
 ;  class	Arbitrary CSS-classes, primarily used for filtering the probes by above filters, recommended
-;  cmd      EITHER a command to get executed, macros defined in [macros] are automatically expanded
-;  script   OR name of a script in the scripts-directory
-;  order    An integer to determine the order in which the probes are displayed, optional
-;  confirm  Probe is not auto refreshed, but explicitly by user-confirmation (e.g. SMART self-tests)
+;  cmd      EITHER a command to get executed (macros defined in [macros] are automatically expanded)
+;  script    OR    a name of a script in the scripts-directory
+;  order    A number to determine the order in which the probes are displayed, optional
+;  confirm  Probe is not automatically refreshed, but only explicitly by user-confirmation (e.g. SMART self-tests)
 
 
 ;*****************************

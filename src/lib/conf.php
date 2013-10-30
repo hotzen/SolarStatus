@@ -9,6 +9,7 @@ function parseConfig($file) {
 	if (!is_readable($file))
 		throw new Exception("conf.ini.php not readable");
 	
+	/*
 	$content = file_get_contents($file);
 	if ($content === false)
 		throw new Exception("could not read conf.ini.php");
@@ -17,12 +18,15 @@ function parseConfig($file) {
 	$parseableContent = substr($content, $firstNewlinePos+1);
 	
 	$ini = parse_ini_string($parseableContent, true);
+	*/
+	$ini = parse_ini_file($file, true);
 	if ($ini === false)
 		throw new Exception("could not parse conf.ini.php");
 	
 	$iniUC = uppercaseConfKeys($ini);
 	$conf = array(
-		  'MACROS'   => array()
+		  'MENU'     => array()
+		, 'MACROS'   => array()
 		, 'DEVSETS'  => array()
 		, 'COMMANDS' => array()
 		, 'FILTERS'  => array()
@@ -32,7 +36,6 @@ function parseConfig($file) {
 	$probesAutoOrder = 1000;
 	
 	foreach ($iniUC as $section => $sectionConf) {
-		
 		// macros
 		if ($section == 'MACROS') {
 			foreach ($sectionConf as $name => $value) {

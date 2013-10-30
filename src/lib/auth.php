@@ -72,9 +72,9 @@ function checkLogin($challenge, $response) {
 
 function doLogin() {
 	session_regenerate_id();
-	$_SESSION['AUTH'] = true;
-	$_SESSION['IP'] = $_SERVER['REMOTE_ADDR'];
-	$_SESSION['UA'] = $_SERVER['HTTP_USER_AGENT'];
+	$_SESSION['AUTH']   = true;
+	$_SESSION['IP']     = $_SERVER['REMOTE_ADDR'];
+	$_SESSION['UA']     = $_SERVER['HTTP_USER_AGENT'];
 	$_SESSION['EXPIRE'] = -1; // will be properly set by updateSession()	
 }
 
