@@ -14,7 +14,7 @@ initSession();
 	  http://stackoverflow.com/questions/6771258/whats-the-difference-if-meta-http-equiv-x-ua-compatible-content-ie-edge-e
 	-->
 	
-	<title>SolarStatus 0.10</title>
+	<title>SolarStatus 0.11</title>
 	
 	<link href="style.css" rel="stylesheet" type="text/css"></link>
 	<script src="js/lib.js" type="text/javascript"></script>
@@ -220,16 +220,16 @@ EOC;
 		<header>
 			<h1>${label}</h1>
 			<ul class="view-selector hide">
-				<li class="original" data-selector=".original"><a href="#data" title="View Original Data">Original</a></li>
+				<li class="raw" data-selector=".raw"><a href="#data" title="View raw output">Raw</a></li>
 			</ul>
 			<a href="#refresh" class="refresh" title="Refresh"></a>
 			<div class="failure hide"></div>
-			<!-- TODO <a href="#minimize" class="minimize" title="Minimize Output"></a> -->
+			<!-- TODO <a href="#minimize" class="minimize" title="Minimize output"></a> -->
 			<a href="#fullsize" class="fullsize" title="View fullsize without scrollbars"></a>
-			<a href="#select" class="select" title="Select Output"></a>
+			<a href="#select" class="select" title="Select output for copy/paste"></a>
 		</header>
 		<div class="content">
-			<div class="original selected">${confirmData}</div>
+			<div class="raw selected">${confirmData}</div>
 		</div>
 		<footer>
 			<time datetime="" data-timestamp=""></time>

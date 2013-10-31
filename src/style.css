@@ -353,17 +353,17 @@ li#menu {
 	overflow: auto;
 }
 
-.probe .content .original .result {
+.probe .content .raw .result {
 	border-bottom: 1px dotted black;
 	margin: 5px;
 	margin-top: 1px;
 }
 
-.probe .content .original .result.last {
+.probe .content .raw .result.last {
 	border-bottom: 0;
 }
 
-.probe .content .original .result code {
+.probe .content .raw .result code {
 	white-space: pre;
 	font-family: "Lucida Console", monospace;
 	font-size: 0.7em;
@@ -371,23 +371,23 @@ li#menu {
 	border-bottom: 1px solid #CCC;
 }
 
-.probe .content .original .result code.rc {
+.probe .content .raw .result code.rc {
 	margin-left: 1em;
 }
 
-.probe .content .original .result code.cmd:before {
+.probe .content .raw .result code.cmd:before {
 	content: "[";
 }
 
-.probe .content .original .result code.rc:before {
+.probe .content .raw .result code.rc:before {
 	 content: "\21D2";
 }
 
-.probe .content .original .result code.rc:after {
+.probe .content .raw .result code.rc:after {
 	content: "]";
 }
 
-.probe .content .original .result pre {
+.probe .content .raw .result pre {
 	font-family: "Lucida Console", monospace;
 	font-size: 0.8em;
 	margin: 0;

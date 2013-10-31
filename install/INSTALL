@@ -53,10 +53,9 @@ Please check the following directives inside the file:
   server.errorlog
   var.php_bin-path
 
-The bundled lighttpd.conf enables SSL/TLS,
-to disable use the following directives:
-  server.port = 80
-  ssl.engine  = "disable"
+The bundled lighttpd.conf contains directives to enable SSL/TLS, change the following:
+  server.port = 443
+  ssl.engine = "enable"
 
 To generate a self-signed certificate:
   openssl req -new -x509 -keyout server.pem -out server.pem -days 100 -nodes

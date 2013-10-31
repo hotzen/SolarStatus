@@ -1,0 +1,176 @@
+# thanks to mlampe from HardwareLuxx
+# http://www.hardwareluxx.de/community/f101/solarstatus-minimalistisches-status-webinterface-fuer-unix-solaris-844443-2.html#post21351176
+
+server.modules = (
+  "mod_fastcgi",
+  "mod_access",
+  "mod_auth",
+#                               "mod_rewrite",
+#                               "mod_redirect",
+#                               "mod_alias",
+#                               "mod_access",
+#                               "mod_trigger_b4_dl",
+#                               "mod_status",
+#                               "mod_setenv",
+#                               "mod_proxy",
+#                               "mod_simple_vhost",
+#                               "mod_evhost",
+#                               "mod_userdir",
+#                               "mod_cgi",
+#                               "mod_compress",
+#                               "mod_ssi",
+#                               "mod_usertrack",
+#                               "mod_expire",
+#                               "mod_secdownload",
+#                               "mod_rrdtool",
+#                               "mod_accesslog"
+)
+
+#server.bind = "127.0.0.1"
+server.port = 80
+
+server.event-handler = "linux-sysepoll"
+server.network-backend = "linux-sendfile"
+
+#server.chroot = "/"
+server.username  = "www-data"
+server.groupname = "www-data"
+
+#server.tag = "lighttpd"
+
+server.pid-file      = "/var/run/lighttpd.pid"
+server.document-root = "/var/www"
+server.errorlog      = "/var/log/lighttpd/error.log"
+server.upload-dirs   = ( "/tmp" )
+
+# ssl.engine    = "enable"
+# ssl.pemfile   = "/etc/lighttpd/server.pem"
+# ssl.use-sslv2 = "enable"
+#setenv.add-environment = ( "HTTPS" => "on" )
+
+index-file.names = ( "index.php", "index.html" )
+url.access-deny = ( "~", ".inc" )
+
+$HTTP["url"] =~ "\.pdf$" {
+  server.range-requests = "disable"
+}
+
+static-file.exclude-extensions = ( ".php", ".pl", ".fcgi" )
+
+var.php_bin-path = "/usr/bin/php-cgi"
+
+fastcgi.server = ( ".php" =>
+  ( "localhost" =>
+    ( "socket"   => "/tmp/php-fastcgi.socket",
+      "bin-path" => php_bin-path )
+  )
+)
+
+#server.errorfile-prefix  = "/var/lighttpd/1.4/errors/status-"
+#server.error-handler-404 = "/error-handler.html"
+
+#accesslog.filename = "/var/lighttpd/logs/access.log"
+
+#dir-listing.activate       = "enable"
+#dir-listing.encoding        = "utf-8"
+
+#debug.log-request-header   = "enable"
+#debug.log-response-header  = "enable"
+#debug.log-request-handling = "enable"
+#debug.log-file-not-found   = "enable"
+
+#compress.cache-dir         = "/var/cache/lighttpd/compress/"
+#compress.filetype          = ("text/plain", "text/html")
+
+#status.status-url          = "/status"
+#status.config-url          = "/config"
+
+#auth.backend               = "plain"
+#auth.backend.plain.userfile = "lighttpd.user"
+#auth.backend.plain.groupfile = "lighttpd.group"
+
+#auth.require               = ( "/server-status" =>
+#                               (
+#                                 "method"  => "digest",
+#                                 "realm"   => "download archiv",
+#                                 "require" => "user=jan"
+#                               ),
+#                               "/server-config" =>
+#                               (
+#                                 "method"  => "digest",
+#                                 "realm"   => "download archiv",
+#                                 "require" => "valid-user"
+#                               )
+#                             )
+
+
+
+#url.rewrite                = ( "^/$"             => "/server-status" )
+#url.redirect               = ( "^/wishlist/(.+)" => "http://www.123.org/$1" )
+#### both rewrite/redirect support back reference to regex conditional using %n
+#$HTTP["host"] =~ "^www\.(.*)" {
+#  url.redirect            = ( "^/(.*)" => "http://%1/$1" )
+#}
+#
+
+
+mimetype.assign             = (
+  ".pdf"          =>      "application/pdf",
+  ".sig"          =>      "application/pgp-signature",
+  ".spl"          =>      "application/futuresplash",
+  ".class"        =>      "application/octet-stream",
+  ".ps"           =>      "application/postscript",
+  ".torrent"      =>      "application/x-bittorrent",
+  ".dvi"          =>      "application/x-dvi",
+  ".gz"           =>      "application/x-gzip",
+  ".pac"          =>      "application/x-ns-proxy-autoconfig",
+  ".swf"          =>      "application/x-shockwave-flash",
+  ".tar.gz"       =>      "application/x-tgz",
+  ".tgz"          =>      "application/x-tgz",
+  ".tar"          =>      "application/x-tar",
+  ".zip"          =>      "application/zip",
+  ".mp3"          =>      "audio/mpeg",
+  ".m3u"          =>      "audio/x-mpegurl",
+  ".wma"          =>      "audio/x-ms-wma",
+  ".wax"          =>      "audio/x-ms-wax",
+  ".ogg"          =>      "application/ogg",
+  ".wav"          =>      "audio/x-wav",
+  ".gif"          =>      "image/gif",
+  ".jar"          =>      "application/x-java-archive",
+  ".jpg"          =>      "image/jpeg",
+  ".jpeg"         =>      "image/jpeg",
+  ".png"          =>      "image/png",
+  ".xbm"          =>      "image/x-xbitmap",
+  ".xpm"          =>      "image/x-xpixmap",
+  ".xwd"          =>      "image/x-xwindowdump",
+  ".css"          =>      "text/css",
+  ".html"         =>      "text/html",
+  ".htm"          =>      "text/html",
+  ".js"           =>      "text/javascript",
+  ".asc"          =>      "text/plain",
+  ".c"            =>      "text/plain",
+  ".cpp"          =>      "text/plain",
+  ".log"          =>      "text/plain",
+  ".conf"         =>      "text/plain",
+  ".text"         =>      "text/plain",
+  ".txt"          =>      "text/plain",
+  ".dtd"          =>      "text/xml",
+  ".xml"          =>      "text/xml",
+  ".mpeg"         =>      "video/mpeg",
+  ".mpg"          =>      "video/mpeg",
+  ".mov"          =>      "video/quicktime",
+  ".qt"           =>      "video/quicktime",
+  ".avi"          =>      "video/x-msvideo",
+  ".asf"          =>      "video/x-ms-asf",
+  ".asx"          =>      "video/x-ms-asf",
+  ".wmv"          =>      "video/x-ms-wmv",
+  ".bz2"          =>      "application/x-bzip",
+  ".tbz"          =>      "application/x-bzip-compressed-tar",
+  ".tar.bz2"      =>      "application/x-bzip-compressed-tar",
+  # default mime type
+  ""              =>      "application/octet-stream",
+ )
+
+# Use the "Content-Type" extended attribute to obtain mime type if possible
+#mimetype.use-xattr        = "enable"
+

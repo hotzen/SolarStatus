@@ -233,7 +233,7 @@ function registerProbeButtons() {
 function selectProbeText($probe) {
 	var $selectedContent = $probe.find(".content .selected")
 	
-	var $elem = $selectedContent.is(".original") ? $selectedContent.find("pre")
+	var $elem = $selectedContent.is(".raw") ? $selectedContent.find("pre")
 												 : $selectedContent;
 	var elem = $elem.get(0)
 
@@ -329,8 +329,8 @@ function refreshProbe($probe, force) {
 			return onError(xhr, errorCode, errorMsg)
 		}
 		
-		// clear original output
-		var $original = $probe.find(".content .original").empty()
+		// clear raw output
+		var $raw = $probe.find(".content .raw").empty()
 		
 		// store time in <time>
 		var ts = parseInt(data["time"])
@@ -351,9 +351,9 @@ function refreshProbe($probe, force) {
 			// replace NL with carriage-return-style arrow
 			var cmdText = cmd.replace(/\n/g, "&nbsp;&crarr;") 
 			
-			// insert NL after "&&" if command is too long
+			// insert "\ NL" after "&&" if command is too long
 			if (cmdText.length > 150) { 
-				cmdText = cmdText.replace(/\&\&/g, "&&\n&nbsp;")
+				cmdText = cmdText.replace(/\&\&/g, "&& \\\n&nbsp;")
 			}
 			
 			var outText = out.replaceEntities()
@@ -361,7 +361,7 @@ function refreshProbe($probe, force) {
 			// create a dedicated <div>.result
 			var $result = $( document.createElement("div") )
 				.addClass("result")
-				.appendTo( $original );
+				.appendTo( $raw );
 			
 			// put command into <code>
 			$( document.createElement("code") )
@@ -406,7 +406,7 @@ function refreshProbe($probe, force) {
 		failProbe($probe, "[" + errorType + "] " + error)
 
 		// clear output
-		$probe.find(".content .original").empty()
+		$probe.find(".content .raw").empty()
 		
 		// clear loading-state
 		$probe.removeClass("loading")
@@ -436,8 +436,8 @@ function callViewHandlers(probeID, $probe, cmd, rc, lines) {
 	var $content = $probe.find(".content")
 	
 	// reset
-	$selector.hide().children().not(".original").remove()
-	$content.children().not(".original").remove()
+	$selector.hide().children().not(".raw").remove()
+	$content.children().not(".raw").remove()
 	
 	var handlers = viewHandlers[probeID]
 	var promises = []
@@ -449,7 +449,7 @@ function callViewHandlers(probeID, $probe, cmd, rc, lines) {
 	
 	$.when.apply($, promises).always(function() {
 		// show selector and select first view
-		$selector.show().find("li").not(".original").filter(":first").find("a").click()
+		$selector.show().find("li").not(".raw").filter(":first").find("a").click()
 	})
 }
 
